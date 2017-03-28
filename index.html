@@ -1,0 +1,15 @@
+<html>
+  <head>
+      <title>Air Liquide Test</title>
+      <link rel="stylesheet" type="text/css" href="/css/style.css">
+      <script>
+        var openMap = function (){window.open("/maps/"+document.getElementById("pdb").value,"_self")}
+      </script>
+  </head>
+  <body>
+      <h1>Air Liquide Test</h1>
+      <h3>Please enter a PDB</h3>
+      <input type="text" id="pdb" size="4"><br>
+      <input type="button" id="submit" value="Submit" onclick='openMap()'>
+  </body>
+</html>
