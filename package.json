@@ -1,0 +1,17 @@
+{
+  "name": "basicnode",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node airLiquide.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.14.0",
+    "request":"latest"
+  },
+  "devDependencies": {
+  }
+}

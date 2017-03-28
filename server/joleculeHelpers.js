@@ -1,0 +1,152 @@
+
+module.exports = {
+  ensureJoleculeIndex: function(pdbId){joleculeHelpers(pdbId).ensureJoleculeIndex();}
+}
+
+var joleculeHelpers = function(pdbId){
+
+    var childProcess = require("child_process");
+    var path = require('path');
+    var fs = require('fs');
+    var request = require('request');
+    var exports = {};
+
+    var pdbName = pdbId;
+
+    const MAP_FILE_PATH = "http://hpc.csiro.au/users/272675/airliquide/mapfiles/";
+    const PDB_FILE_PATH = "https://files.rcsb.org/view/";
+    const NOBLE_GAS_SYMBOLS = ["Ar","He","Kr","Ne","Xe"];
+
+    exports.ensureJoleculeIndex = function(){
+
+        var localFilePromises = getMapFiles();
+        localFilePromises.push(getPdbFile());
+
+        return Promise.all(localFilePromises)
+            .then(runJoleculePreProcessing)
+            .then(runJoleculeStatic); 
+    };
+
+    var getMapFiles = function(){
+        return NOBLE_GAS_SYMBOLS.map(getMapFile);
+    }
+
+    var getMapFile = function(nobleGas) {
+        var fileName = pdbName + '.' +nobleGas+ '.map'
+        var remoteFilePath = MAP_FILE_PATH + pdbName + '/'+ fileName;
+        var localFilePath = './maps/' +pdbName + '/'+ fileName;   
+        return ensureFileWithRemoteFile(localFilePath,remoteFilePath)
+
+    }
+
+    var getPdbFile = function (){
+    var fileName = pdbName + '.pdb';
+    var remoteFilePath = PDB_FILE_PATH + fileName;
+    var localFilePath = './maps/' +pdbName+ '/'+ fileName;
+    return ensureFileWithRemoteFile(localFilePath,remoteFilePath);
+    }
+
+    var ensureFileWithRemoteFile = function (localFilePath,remoteFilePath){
+        return new Promise(function(resolve,reject){
+            if (fs.existsSync(localFilePath)){
+                console.log(localFilePath+" already exists locally");
+                resolve(localFilePath);
+            }else{
+                var localFileDir = path.dirname(localFilePath);
+                checkDirectorySync(localFileDir);    
+                var remoteFileStream = request(remoteFilePath).pipe(fs.createWriteStream( localFilePath));
+                remoteFileStream.on('finish',function(){
+                    console.log(localFilePath+" created from "+remoteFilePath);
+                    resolve(localFilePath);
+                });
+            }
+        });    
+    }
+
+    function checkIfFile(file) {
+        return new Promise(function(resolve, reject) {
+            return fsStat(file).then(function(stats) {
+            resolve(stats.isFile());
+            }).catch(function(err) {
+            if (err.code === 'ENOENT') {
+                resolve(false);
+            } else {
+                reject(err);
+            }
+            });
+        });
+    }
+
+    function checkIfDirectory(path) {
+        return new Promise(function(resolve, reject) {
+            return fsStat(file).then(function(stats) {
+            resolve(stats.isDirectory());
+            }).catch(function(err) {
+            if (err.code === 'ENOENT') {
+                resolve(false);
+            } else {
+                reject(err);
+            }
+            });
+        });
+    }
+
+    var checkDirectorySync = function (directory) {  
+    try {
+        fs.statSync(directory);
+    } catch(e) {
+        fs.mkdirSync(directory);
+    }
+}
+
+    var runJoleculePreProcessing = function(){
+        return   runScriptAsync('../../resources/jolecule/autodock2pdb.js',[ "-u",-0.5 ,"-s", 2, pdbName],{cwd:"./maps/"+pdbName}, function (err) {
+                if (err) throw err;
+            });
+    }
+
+    var runJoleculeStatic = function (){
+        return  runScriptAsync('../../resources/jolecule/jol-static.js',[pdbName+".pdb", pdbName+".Ar.pdb", pdbName+".He.pdb", pdbName+".Kr.pdb", pdbName+".Ne.pdb", pdbName+".Xe.pdb"],{cwd:"./maps/"+pdbName}, function (err) {
+                if (err) throw err;
+            });
+    }
+
+    var runScriptAsync = function (scriptPath,args,options){
+        return new Promise(function(resolve,reject){
+            runScript(scriptPath,args,options, resolve,reject);
+        });
+    }
+
+    var runScript = function (scriptPath,args,options, success, fail) {
+
+        // keep track of whether callback has been invoked to prevent multiple invocations
+        var invoked = false;
+
+        var process = childProcess.fork(scriptPath,args,options);
+
+        // listen for errors as they may prevent the exit event from firing
+        process.on('error', function (err) {
+            if (invoked) return;
+            invoked = true;
+            console.log(scriptPath + " Failed:" +err);
+            fail(err);
+        });
+
+        // execute the callback once the process has finished running
+        process.on('exit', function (code) {
+            if (invoked) return;
+            invoked = true;
+            var err = code === 0 ? null : new Error('exit code ' + code);
+            if(err){
+                console.log(scriptPath + " Failed:" +err);
+                fail(err);
+            }else{
+                console.log(scriptPath + " Succeeded");
+                success();
+            }
+        });
+
+    }
+        return exports;
+    
+}
