@@ -1,6 +1,6 @@
 
 module.exports = {
-  ensureJoleculeIndex: function(pdbId){joleculeHelpers(pdbId).ensureJoleculeIndex();}
+  ensureJoleculeIndex: function(pdbId){return joleculeHelpers(pdbId).ensureJoleculeIndex();}
 }
 
 var joleculeHelpers = function(pdbId){
@@ -22,10 +22,10 @@ var joleculeHelpers = function(pdbId){
         var localFilePromises = getMapFiles();
         localFilePromises.push(getPdbFile());
 
-        return Promise.all(localFilePromises)
+        return Promise
+            .all(localFilePromises)
             .then(ensureJoleculePreProcessing)
-            .then(runJoleculeStatic)
-            .catch(function(err){console.log("oops!!: " + err)});
+            .then(runJoleculeStatic);
     };
 
     var getMapFiles = function(){
@@ -35,14 +35,14 @@ var joleculeHelpers = function(pdbId){
     var getMapFile = function(nobleGas) {
         var fileName = pdbName + '.' +nobleGas+ '.map';
         var remoteFilePath = MAP_FILE_PATH + pdbName + '/'+ fileName;
-        var localFilePath = './maps/' +pdbName + '/'+ fileName;   
+        var localFilePath = './public/maps/' +pdbName + '/'+ fileName;   
         return ensureFileWithRemoteFile(localFilePath,remoteFilePath)
     };
 
     var getPdbFile = function (){
         var fileName = pdbName + '.pdb';
         var remoteFilePath = PDB_FILE_PATH + fileName;
-        var localFilePath = './maps/' +pdbName+ '/'+ fileName;
+        var localFilePath = './public/maps/' +pdbName+ '/'+ fileName;
         return ensureFileWithRemoteFile(localFilePath,remoteFilePath);
     };
 
@@ -83,7 +83,7 @@ var joleculeHelpers = function(pdbId){
 
     var checkJoleculePreProcessingFile = function(nobleGas) {
         var fileName = pdbName + '.' +nobleGas+ '.pdb';
-        var localFilePath = './maps/' +pdbName + '/'+ fileName;  
+        var localFilePath = './public/maps/' +pdbName + '/'+ fileName;  
         return fs.existsSync(localFilePath);
     };
 
@@ -98,7 +98,7 @@ var joleculeHelpers = function(pdbId){
     };
 
     var runJoleculePreProcessing = function(){
-        return runScriptAsync('../../resources/jolecule/autodock2pdb.js',[ "-u",-0.5 ,"-s", 2, pdbName],{cwd:"./maps/"+pdbName}, function (err) {
+        return runScriptAsync('../../../resources/jolecule/autodock2pdb.js',[ "-u",-0.5 ,"-s", 2, pdbName],{cwd:"./public/maps/"+pdbName}, function (err) {
             if (err) throw err;
         });
     };
@@ -115,7 +115,7 @@ var joleculeHelpers = function(pdbId){
 
     var runJoleculeStatic = function (){
         console.log("attempting to run jol-static");
-        return  runScriptAsync('../../resources/jolecule/jol-static.js',[pdbName+".pdb", pdbName+".Ar.pdb", pdbName+".He.pdb", pdbName+".Kr.pdb", pdbName+".Ne.pdb", pdbName+".Xe.pdb"],{cwd:"./maps/"+pdbName}, function (err) {
+        return  runScriptAsync('../../../resources/jolecule/jol-static.js',[pdbName+".pdb", pdbName+".Ar.pdb", pdbName+".He.pdb", pdbName+".Kr.pdb", pdbName+".Ne.pdb", pdbName+".Xe.pdb"],{cwd:"./public/maps/"+pdbName}, function (err) {
                 if (err) throw err;
                 console.log("jol-static run");
             });
