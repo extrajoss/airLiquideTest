@@ -88,21 +88,19 @@ var joleculeHelpers = function(pdbId){
     };
 
     var ensureJoleculePreProcessing = function(){
-        return new Promise(function(resolve,reject){
-            if(!checkJoleculePreProcessingFiles()){
-                console.log("PreProcessing");
-                return runJoleculePreProcessing()
-            }else{
-                console.log("PreProcessing Skipped");
-                return resolve();
-            }
-        });
+        if(!checkJoleculePreProcessingFiles()){
+            console.log("PreProcessing");
+            return runJoleculePreProcessing();
+        }else{
+            console.log("PreProcessing Skipped");
+            return Promise.resolve();
+        }
     };
 
     var runJoleculePreProcessing = function(){
         return runScriptAsync('../../resources/jolecule/autodock2pdb.js',[ "-u",-0.5 ,"-s", 2, pdbName],{cwd:"./maps/"+pdbName}, function (err) {
-                    if (err) throw err;
-                });
+            if (err) throw err;
+        });
     };
 
     var checkJoleculeStaticFiles = function(){
