@@ -10,6 +10,8 @@ var joleculeHelpers = function(pdbId){
     var fs = require('fs');
     var request = require('request');
     var exports = {};
+    const ENERGY_CUTOFF = -0.5;
+    const SPACIAL_CUTOFF = 2;
 
     var pdbName = pdbId;
 
@@ -18,15 +20,17 @@ var joleculeHelpers = function(pdbId){
     const NOBLE_GAS_SYMBOLS = ["Ar","He","Kr","Ne","Xe"];
 
     exports.ensureJoleculeIndex = function(){
-
-        var localFilePromises = getMapFiles();
-        localFilePromises.push(getPdbFile());
-
-        return Promise
-            .all(localFilePromises)
+            return ensureLocalFiles()
             .then(ensureJoleculePreProcessing)
             .then(runJoleculeStatic);
     };
+
+    var ensureLocalFiles = function(){
+        var localFiles = getMapFiles();
+        localFiles.push(getPdbFile());
+        return Promise
+            .all(localFiles);
+    }
 
     var getMapFiles = function(){
         return NOBLE_GAS_SYMBOLS.map(getMapFile);
@@ -98,7 +102,7 @@ var joleculeHelpers = function(pdbId){
     };
 
     var runJoleculePreProcessing = function(){
-        return runScriptAsync('../../../resources/jolecule/autodock2pdb.js',[ "-u",-0.5 ,"-s", 2, pdbName],{cwd:"./public/maps/"+pdbName}, function (err) {
+        return runScriptAsync('../../../resources/jolecule/autodock2pdb.js',[ "-u", ENERGY_CUTOFF,"-s", SPACIAL_CUTOFF, pdbName],{cwd:"./public/maps/"+pdbName}, function (err) {
             if (err) throw err;
         });
     };
