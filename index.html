@@ -1,15 +1,17 @@
 <html>
   <head>
       <title>Air Liquide Test</title>
+      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
       <link rel="stylesheet" type="text/css" href="/css/style.css">
       <script>
-        var openMap = function (){window.open("/maps/"+document.getElementById("pdb").value,"_self")}
+        var openMap = function (){window.open("/maps/"+document.getElementById("pdb").value,"_self");return false;}
       </script>
   </head>
   <body>
+    <form>
       <h1>Air Liquide Test</h1>
-      <h3>Please enter a PDB</h3>
-      <input type="text" id="pdb" size="4"><br>
-      <input type="button" id="submit" value="Submit" onclick='openMap()'>
+      <label for="pdb">PDB to display</label>
+      <input type="text" id="pdb" name="pdb" size="4" autofocus><input id="pdbSubmit" name='pdbSubmit' type="submit" onclick="return openMap();" />    
+    </form>    
   </body>
 </html>

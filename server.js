@@ -12,15 +12,16 @@ app.get('/',function(req,res){
 });
 app.get(
     '/maps/:pdb/',
-    function(req, res,next){
+    function(req, res, next){
         if(req.params.pdb.match(/^\w{4}$/)){
             joleculeHelpers.ensureJoleculeIndex(req.params.pdb)
-                .then(next);               
+                .then(next)
+                .catch(function(err){next(new Error(err));});        
         }else{
             res.send("Not a valid PDB record");
         }
     },
-    function(req,res,next){
+    function(req,res){
         var fileToRedirect = '/maps/' + req.params.pdb + '/' + req.params.pdb + '-jol/index.html';
         console.log("Redirecting to: " + fileToRedirect);
         res.redirect(fileToRedirect);
@@ -28,7 +29,7 @@ app.get(
 );
 
 var srv = app.listen(port, function(){
-    console.log('"AirLiquideTest" is listening on port: ' + port)
+    console.log('"AirLiquideTest" listening on port: ' + port)
 });
 
 

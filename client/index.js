@@ -1,8 +1,1 @@
-function helloMichael(){
-	var content = document.getElementById("container").innerHTML;
-	document.getElementById("container").innerHTML = content + "<br>Happy birthday!";
-};
-
-(function() {
-	helloMichael();
-})();
+var openMap = function (){window.open("/maps/"+document.getElementById("pdb").value,"_self")}

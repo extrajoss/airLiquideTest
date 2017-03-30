@@ -3,17 +3,17 @@ module.exports = {
   ensureJoleculeIndex: function(pdbId){return joleculeHelpers(pdbId).ensureJoleculeIndex();}
 }
 
-var joleculeHelpers = function(pdbId){
+let joleculeHelpers = function(pdbId){
 
-    var childProcess = require("child_process");
-    var path = require('path');
-    var fs = require('fs');
-    var request = require('request');
-    var exports = {};
-    const ENERGY_CUTOFF = -0.5;
+    let childProcess = require("child_process");
+    let path = require('path');
+    let fs = require('fs');
+    let request = require('request');
+    let exports = {};
+    const ENERGY_CUTOFF = -0.6;
     const SPACIAL_CUTOFF = 2;
 
-    var pdbName = pdbId;
+    let pdbName = pdbId;
 
     const MAP_FILE_PATH = "http://hpc.csiro.au/users/272675/airliquide/mapfiles/";
     const PDB_FILE_PATH = "https://files.rcsb.org/view/";
@@ -22,52 +22,65 @@ var joleculeHelpers = function(pdbId){
     exports.ensureJoleculeIndex = function(){
             return ensureLocalFiles()
             .then(ensureJoleculePreProcessing)
-            .then(runJoleculeStatic);
+            .then(ensureJoleculeStatic)
+            .catch(function(err){throw(err)});
     };
 
-    var ensureLocalFiles = function(){
-        var localFiles = getMapFiles();
+    let ensureLocalFiles = function(){
+        let localFiles = getMapFiles();
         localFiles.push(getPdbFile());
         return Promise
             .all(localFiles);
     }
 
-    var getMapFiles = function(){
+    let getMapFiles = function(){
         return NOBLE_GAS_SYMBOLS.map(getMapFile);
     };
 
-    var getMapFile = function(nobleGas) {
-        var fileName = pdbName + '.' +nobleGas+ '.map';
-        var remoteFilePath = MAP_FILE_PATH + pdbName + '/'+ fileName;
-        var localFilePath = './public/maps/' +pdbName + '/'+ fileName;   
+    let getMapFile = function(nobleGas) {
+        let fileName = pdbName + '.' +nobleGas+ '.map';
+        let remoteFilePath = MAP_FILE_PATH + pdbName + '/'+ fileName;
+        let localFilePath = './public/maps/' +pdbName + '/'+ fileName;   
         return ensureFileWithRemoteFile(localFilePath,remoteFilePath)
     };
 
-    var getPdbFile = function (){
-        var fileName = pdbName + '.pdb';
-        var remoteFilePath = PDB_FILE_PATH + fileName;
-        var localFilePath = './public/maps/' +pdbName+ '/'+ fileName;
+    let getPdbFile = function (){
+        let fileName = pdbName + '.pdb';
+        let remoteFilePath = PDB_FILE_PATH + fileName;
+        let localFilePath = './public/maps/' +pdbName+ '/'+ fileName;
         return ensureFileWithRemoteFile(localFilePath,remoteFilePath);
     };
 
-    var ensureFileWithRemoteFile = function (localFilePath,remoteFilePath){
+    let getRemoteFile = function(localFilePath,remoteFilePath){
+        return new Promise((resolve,reject)=>{
+            let remoteFileStream = request(remoteFilePath).pipe(fs.createWriteStream( localFilePath));
+            remoteFileStream.on('finish',resolve);
+            remoteFileStream.on('error',reject);
+        });
+    }
+
+    let ensureFileWithRemoteFile = function (localFilePath,remoteFilePath){
         return new Promise(function(resolve,reject){
             if (fs.existsSync(localFilePath)){
                 console.log(localFilePath+" already exists locally");
                 resolve(localFilePath);
             }else{
-                var localFileDir = path.dirname(localFilePath);
-                checkDirectorySync(localFileDir);    
-                var remoteFileStream = request(remoteFilePath).pipe(fs.createWriteStream( localFilePath));
-                remoteFileStream.on('finish',function(){
-                    console.log(localFilePath+" created from "+remoteFilePath);
-                    resolve(localFilePath);
-                });
+                let localFileDir = path.dirname(localFilePath);
+                ensureDirectorySync(localFileDir);   
+                getRemoteFile(localFilePath,remoteFilePath) 
+                    .then(function(){
+                        if (fs.existsSync(localFilePath)){
+                            console.log(localFilePath+" created from "+remoteFilePath);
+                            resolve(localFilePath);
+                        }else{
+                            reject("failed to create "+ localFilePath + " from "+ remoteFilePath);
+                        }
+                    });
             }
         });    
     };
 
-    var checkDirectorySync = function (directory) {  
+    let ensureDirectorySync = function (directory) {  
         try {
             fs.statSync(directory);
         } catch(e) {
@@ -75,9 +88,19 @@ var joleculeHelpers = function(pdbId){
         }
     };
 
-    var checkJoleculePreProcessingFiles = function(){
-        var fileChecks = NOBLE_GAS_SYMBOLS.map(checkJoleculePreProcessingFile);
-        for (var i = 0; i < fileChecks.length; i++) {
+    let checkDirectorySync = function (directory) {  
+        try {
+            fs.statSync(directory);
+            return true;
+        } catch(e) {
+            return false;
+        }
+    };
+    
+
+    let checkJoleculePreProcessingFiles = function(){
+        let fileChecks = NOBLE_GAS_SYMBOLS.map(checkJoleculePreProcessingFile);
+        for (let i = 0; i < fileChecks.length; i++) {
             if(!fileChecks[i]){
                 return false;
             }       
@@ -85,64 +108,102 @@ var joleculeHelpers = function(pdbId){
         return true;
     };
 
-    var checkJoleculePreProcessingFile = function(nobleGas) {
-        var fileName = pdbName + '.' +nobleGas+ '.pdb';
-        var localFilePath = './public/maps/' +pdbName + '/'+ fileName;  
+    let checkJoleculePreProcessingFile = function(nobleGas) {
+        let fileName = pdbName + '.' +nobleGas+ '.pdb';
+        let localFilePath = './public/maps/' +pdbName + '/'+ fileName;  
         return fs.existsSync(localFilePath);
     };
 
-    var ensureJoleculePreProcessing = function(){
-        if(!checkJoleculePreProcessingFiles()){
-            console.log("PreProcessing");
-            return runJoleculePreProcessing();
-        }else{
-            console.log("PreProcessing Skipped");
-            return Promise.resolve();
-        }
-    };
-
-    var runJoleculePreProcessing = function(){
-        return runScriptAsync('../../../resources/jolecule/autodock2pdb.js',[ "-u", ENERGY_CUTOFF,"-s", SPACIAL_CUTOFF, pdbName],{cwd:"./public/maps/"+pdbName}, function (err) {
-            if (err) throw err;
+    let ensureJoleculePreProcessing = function(){
+        return new Promise(function(resolve,reject){
+            if(checkJoleculePreProcessingFiles()){
+                console.log("PreProcessing Files Found");
+                return resolve();
+            }else{
+                console.log("PreProcessing Files Not Found");
+                runJoleculePreProcessing()
+                    .then(function(){
+                        if(checkJoleculePreProcessingFiles()){
+                            console.log("PreProcessing Files Found");
+                            return resolve();                        
+                        }else{
+                            return reject("PreProcessing succeeded but PreProcessingFiles not generated");
+                        }
+                    });
+            }
         });
     };
 
-    var checkJoleculeStaticFiles = function(){
-        return [Promise.resolve()];
+    let runJoleculePreProcessing = function(){
+        return runScriptAsync('../../../resources/jolecule/autodock2pdb.js',[ "-u", ENERGY_CUTOFF,"-s", SPACIAL_CUTOFF, pdbName],{cwd:"./public/maps/"+pdbName});
     };
 
-    var ensureJoleculeStatic = function(){
-        Promise.all(checkJoleculeStaticFiles)
-            .then(function(){Promise.resolve();})
-            .catch(runJoleculeStatic);
+    let checkJoleculeStaticFile = function(){
+        let localFilePath = './public/maps/' +pdbName + '/' +pdbName + '-jol/index.html';  
+        return fs.existsSync(localFilePath);
     };
 
-    var runJoleculeStatic = function (){
-        console.log("attempting to run jol-static");
-        return  runScriptAsync('../../../resources/jolecule/jol-static.js',[pdbName+".pdb", pdbName+".Ar.pdb", pdbName+".He.pdb", pdbName+".Kr.pdb", pdbName+".Ne.pdb", pdbName+".Xe.pdb"],{cwd:"./public/maps/"+pdbName}, function (err) {
-                if (err) throw err;
-                console.log("jol-static run");
-            });
+    let promiseJoleculeStaticFile = function(){
+        return new Promise(
+            function(resolve,reject){
+                if(checkJoleculeStaticFile()){
+                    console.log("Static files found");
+                        return resolve();
+                    }else{
+                        return reject("Static succeeded but Static File not generated");
+                    }
+                }
+            )
+        };
+
+    let ensureJoleculeStatic = function(){
+        return new Promise(function(resolve,reject){
+            console.log("Checking for Static files");
+            if(checkJoleculeStaticFile()){
+                console.log("Static files found");
+                return resolve();
+            }else{
+                console.log("Static files not found");
+                runJoleculeStatic()
+                    .then(function(){
+                            if(checkJoleculeStaticFile()){
+                                console.log("Static files found");
+                                return resolve();
+                            }else{
+                                return reject("Static succeeded but Static File not generated");
+                            }
+                    });
+            }
+        });
     };
 
-    var runScriptAsync = function (scriptPath,args,options){
+    let runJoleculeStatic = function (){
+        console.log("Run jol-static");
+
+        let scriptArguments = [];
+        scriptArguments.push(pdbName+".pdb");
+        scriptArguments = scriptArguments.concat(NOBLE_GAS_SYMBOLS.map(function(nobleGas){return pdbName+"."+nobleGas+".pdb"}));
+        return  runScriptAsync('../../../resources/jolecule/jol-static.js',scriptArguments,{cwd:"./public/maps/"+pdbName});
+    };
+
+    let runScriptAsync = function (scriptPath,args,options){
         return new Promise(function(resolve,reject){
             runScript(scriptPath,args,options, resolve,reject);
         });
     };
 
-    var runScript = function (scriptPath,args,options, success, fail) {
+    let runScript = function (scriptPath,args,options, success, fail) {
 
         // keep track of whether callback has been invoked to prevent multiple invocations
-        var invoked = false;
+        let invoked = false;
 
-        var process = childProcess.fork(scriptPath,args,options);
+        let process = childProcess.fork(scriptPath,args,options);
 
         // listen for errors as they may prevent the exit event from firing
         process.on('error', function (err) {
             if (invoked) return;
             invoked = true;
-            console.log(scriptPath + " Failed:" +err);
+            console.log(scriptPath ,args,options, "Failed" , err);
             fail(err);
         });
 
@@ -150,12 +211,12 @@ var joleculeHelpers = function(pdbId){
         process.on('exit', function (code) {
             if (invoked) return;
             invoked = true;
-            var err = code === 0 ? null : new Error('exit code ' + code);
+            let err = code === 0 ? null : new Error('exit code ' + code);
             if(err){
                 console.log(scriptPath + " Failed:" +err);
                 fail(err);
             }else{
-                console.log(scriptPath + " Succeeded");
+                console.log(scriptPath ,args,options, "Succeeded");
                 success();
             }
         });

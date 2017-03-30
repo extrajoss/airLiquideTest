@@ -4,14 +4,18 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "nodemon",
+    "start:development": "nodemon",
+    "start:production": "node server.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "express": "^4.14.0",
-    "request":"latest"
+    "request":"latest",
+    "forever":"latest"
   },
   "devDependencies": {
+    "nodemon":"latest"
   }
 }

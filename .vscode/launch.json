@@ -8,7 +8,7 @@
             "type": "node",
             "request": "launch",
             "name": "Launch Program",
-            "program": "${workspaceRoot}\\airLiquide.js"
+            "program": "${workspaceRoot}\\server.js"
         },
         {
             "type": "node",
