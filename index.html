@@ -3,15 +3,80 @@
       <title>Air Liquide Test</title>
       <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
       <link rel="stylesheet" type="text/css" href="/css/style.css">
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
       <script>
-        var openMap = function (){window.open("/maps/"+document.getElementById("pdb").value,"_self");return false;}
+        var openMap = function (){   
+          $(".loader").show();
+          $("#jolecule").hide();
+          $.getJSON({
+              url: "/getMaps/"+document.getElementById("pdb").value+"/",
+              success: displayJolecule
+            })
+            .fail(function(err) {
+              console.log('Error: ' ,err);
+            })
+            .always(function(err) {
+              console.log("Loaded");
+              $(".loader").hide();
+              $("#jolecule").show();
+            });
+          return false;
+        };  
+        var displayJolecule = function(res) {
+                document.getElementById("jolecule").innerHTML = "";
+                 if(res.ErrorText){
+                    alert(res.ErrorText);
+                    return;
+                }
+                var pdb = res.pdb
+                
+                require( 
+                      ['scripts/jolecule', 
+                      "maps/"+pdb+"/"+pdb+"-jol/data-server0", 
+                      "maps/"+pdb+"/"+pdb+"-jol/data-server1", 
+                      "maps/"+pdb+"/"+pdb+"-jol/data-server2", 
+                      "maps/"+pdb+"/"+pdb+"-jol/data-server3", 
+                      "maps/"+pdb+"/"+pdb+"-jol/data-server4", 
+                      "maps/"+pdb+"/"+pdb+"-jol/data-server5"], 
+                      function(jolecule, dataServer0, dataServer1, dataServer2, dataServer3, dataServer4, dataServer5) {
+                  document.title = "jolecule - "+pdb;
+                  jolecule.initEmbedJolecule({
+                      div_tag: '#jolecule',
+                      data_servers: [dataServer0, dataServer1, dataServer2, dataServer3, dataServer4, dataServer5],
+                      isGrid: true,
+                  });
+              });      
+            }
       </script>
+          <meta name="viewport" 
+        content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0"/>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <link rel="stylesheet" type="text/css" href="css/jolecule.css"/>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            width: 100%;
+            height: 100%;
+        }
+        form{
+          height:10%
+        }
+        #jolecule {
+            width: 100%;
+            height: 80%;
+        }
+    </style>
   </head>
   <body>
     <form>
       <h1>Air Liquide Test</h1>
       <label for="pdb">PDB to display</label>
       <input type="text" id="pdb" name="pdb" size="4" autofocus><input id="pdbSubmit" name='pdbSubmit' type="submit" onclick="return openMap();" />    
-    </form>    
+    </form>  
+    <div class="loader" style="display:none"></div>
+    <div id="jolecule"></div>
+    <script src="scripts/require.js"></script>  
   </body>
 </html>

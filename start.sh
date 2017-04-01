@@ -16,4 +16,4 @@ then
     rm log/console.log
 fi
 
-./node_modules/forever/bin/forever start -l $DIR/log/console.log --uid="airliquidetest" server.js
+./node_modules/forever/bin/forever start -l $DIR/log/console.log --uid="AirLiquide" server.js
