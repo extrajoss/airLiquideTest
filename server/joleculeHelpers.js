@@ -18,7 +18,8 @@ var joleculeHelpers = function(pdbId){
     const MAP_FILE_PATH = "http://hpc.csiro.au/users/272675/airliquide/mapfiles/";
     const PDB_FILE_PATH = "https://files.rcsb.org/view/";
     const NOBLE_GAS_SYMBOLS = ["Ar","He","Kr","Ne","Xe"];
-    const PREPROCESSING_SCRIPT = '../../../resources/jolecule/autodock2pdb.js';
+    const PREPROCESSING_SCRIPT = '../../../resources/jolecule/autodock2pdbES5.js';
+    const JOL_STATIC_SCRIPT ='../../../resources/jolecule/jol-static.js';
 
     exports.ensureJoleculeIndex = function(){
             return ensureLocalFiles()
@@ -30,7 +31,8 @@ var joleculeHelpers = function(pdbId){
         var localFiles = getMapFiles();
         localFiles.push(getPdbFile());
         return Promise
-            .all(localFiles);
+            .all(localFiles)
+            .catch(function(err){throw("Failed to find PDB or Map Files due to the following error: " + err)});
     }
 
     var getMapFiles = function(){
@@ -52,7 +54,7 @@ var joleculeHelpers = function(pdbId){
     };
 
     var getRemoteFile = function(localFilePath,remoteFilePath){
-        return new Promise((resolve,reject)=>{
+        return new Promise(function(resolve,reject){
             var remoteFileStream = request(remoteFilePath);
             remoteFileStream.pause();
             remoteFileStream.on('end',resolve);
@@ -63,7 +65,7 @@ var joleculeHelpers = function(pdbId){
                     remoteFileStream.pipe(fs.createWriteStream(localFilePath));           
                     remoteFileStream.resume();
                 }else{ 
-                    reject("Could not retrieve "+localFilePath+" from "+ remoteFilePath +". Received StatusCode: "+resp.statusCode);
+                    reject("Could not retrieve file from "+ remoteFilePath +". Received StatusCode: "+resp.statusCode);
                 }
             })
         });
@@ -136,7 +138,8 @@ var joleculeHelpers = function(pdbId){
                     }else{
                         throw("PreProcessing succeeded but PreProcessingFiles not generated");
                     }
-                });
+                })
+                .catch(function(err){throw("Failed to PreProcess map files due to the following error: " + err)});
         }
     };
 
@@ -164,7 +167,8 @@ var joleculeHelpers = function(pdbId){
                         }else{
                             throw("Static script succeeded but Static File not generated");
                         }
-                });
+                })
+                .catch(function(err){throw("Failed to Build Jolecule Data_Server due to the following error: " + err)});
         }
     };
 
@@ -174,7 +178,7 @@ var joleculeHelpers = function(pdbId){
         var scriptArguments = [];
         scriptArguments.push(pdbName+".pdb");
         scriptArguments = scriptArguments.concat(NOBLE_GAS_SYMBOLS.map(function(nobleGas){return pdbName+"."+nobleGas+".pdb"}));
-        return  runScriptAsync('../../../resources/jolecule/jol-static.js',scriptArguments,{cwd:"./public/maps/"+pdbName});
+        return  runScriptAsync(JOL_STATIC_SCRIPT,scriptArguments,{cwd:"./public/maps/"+pdbName});
     };
 
     var runScriptAsync = function (scriptPath,args,options){

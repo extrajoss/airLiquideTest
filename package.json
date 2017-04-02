@@ -4,6 +4,7 @@
   "description": "",
   "main": "server.js",
   "scripts": {
+    "babel":"babel",
     "start": "nodemon",
     "start:development": "nodemon",
     "start:production": "node server.js"
@@ -11,9 +12,11 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "ejs":"latest",
     "express": "^4.14.0",
     "request":"latest",
-    "forever":"latest"
+    "forever":"latest",
+    "babel": "latest"
   },
   "devDependencies": {
     "nodemon":"latest"

@@ -29,6 +29,7 @@ var returnPage =function(res, pdb){
 var checkFilesAndReturn = function(req, res, view){
     var pdb = req.params.pdb;
     if(isPdb(pdb)){
+        console.log("start building promise");
         getEnsureJoleculeIndex(pdb)
             .then(function(){
                 delete(processingCache.pdb);
@@ -36,13 +37,14 @@ var checkFilesAndReturn = function(req, res, view){
             })
             .catch(function(err){
                 delete(processingCache.pdb);
-                console.error("An Error occured during file preparation " + err);
+                console.error("An Error occured during file preparation: " + err);
                 res.send('{"ErrorText": "'+err+'"}');
-            });        
+            });   
+            console.log("finished building promise");     
     }else{
-        err = pdb+" is not a valid PDB record";
+        err = "'"+pdb+"' is not a valid PDB record";
         console.error(err);
-        res.send("{'ErrorText': '"+err+"'}");
+        res.send('{"ErrorText": "'+err+'"}');
     }
 };
 
