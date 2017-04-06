@@ -3,90 +3,20 @@
       <title><%=pdb%> - Air Liquide Test</title>
       <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
       <link rel="stylesheet" type="text/css" href="/css/style.css">
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+      <script src="/scripts/airLiquide.js"></script>
           <meta name="viewport" 
         content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0"/>
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
-    <link rel="stylesheet" type="text/css" href="../../css/jolecule.css"/>
-        <script src="../../scripts/require.js"></script>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
-      <script>
-      var loadingText = '<div style="display: inline-block">Checking file requirements.<br/>This may takes several minutes.</div> <div class="loader" style="display: inline-block"></div>';
-        var loadingDiv = $("<div></div>").attr('id', 'temploading-message').css({
-	      'z-index': 5000,
-	      'background-color': 'rgba(60, 60, 60, 0.75)',
-	      'font-family': 'Helvetica, Arial, sans-serif',
-	      'font-size': '12px',
-	      'letter-spacing': '0.1em',
-	      'padding': '5px',
-	      'color': '#666' }).html(loadingText);
-        var openMap = function (pdb){             
-          $.getJSON({
-              url: "/getMaps/"+pdb+"/",
-              success: displayJolecule
-            })
-            .fail(function(err) {
-                $('#temploading-message').empty();
-                console.log(err.responseText,err.responseText.ErrorText);
-                $('#temploading-message').html(err.responseText.ErrorText);   
-                console.log('Error: ' ,err);
-            })
-            .always(function(err) {
-              console.log("Loaded");
-            });
-        };  
-        var displayJolecule = function(res) {
-                if(res.ErrorText){
-                    console.error(res.ErrorText);  
-                    $('#temploading-message').empty();
-                    $('#temploading-message').html(res.ErrorText);                           
-                    return;
-                }
-                console.log("displayJolecule",res);
-                var pdb = res.pdb             
-                require( 
-                      ['../../scripts/jolecule', 
-                      "../../maps/"+pdb+"/"+pdb+"-jol/data-server0", 
-                      "../../maps/"+pdb+"/"+pdb+"-jol/data-server1", 
-                      "../../maps/"+pdb+"/"+pdb+"-jol/data-server2", 
-                      "../../maps/"+pdb+"/"+pdb+"-jol/data-server3", 
-                      "../../maps/"+pdb+"/"+pdb+"-jol/data-server4", 
-                      "../../maps/"+pdb+"/"+pdb+"-jol/data-server5"], 
-                      function(jolecule, dataServer0, dataServer1, dataServer2, dataServer3, dataServer4, dataServer5) {                  
-                  jolecule.initEmbedJolecule({
-                      div_tag: '#jolecule',
-                      data_servers: [dataServer0, dataServer1, dataServer2, dataServer3, dataServer4, dataServer5],
-                      isGrid: true,
-                      loading_html:"<div class='loader'>Loading....</div>",
-                  });
-              }); 
-              document.getElementById("tempLoading").style.display = "none";     
-            }
-      </script>
-    <style>
-        body {
-            margin: 0;
-            overflow: hidden;
-            width: 100%;
-            height: 100%;
-        }
-        #tempLoading {
-            background-color: #000;
-            width: 100%;
-            height: 100%;
-        }
-        #jolecule {
-            width: 100%;
-            height: 100%;
-        }
-    </style>
+    <link rel="stylesheet" type="text/css" href="/css/full-page-jolecule.css"/>
+    <link rel="stylesheet" type="text/css" href="/css/jolecule.css"/>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
   </head>
-  <body>
-  <div id="tempLoading"></div>
-  <div id="jolecule"></div>
-    <script>
-    $("#tempLoading").append(loadingDiv);
-        openMap('<%=pdb%>');
-      </script>
+  <body>  
+    <div id="tempLoading"></div>
+    <div id="jolecule"></div>
+    <script src="/scripts/require.js"></script>  
+    <script>$("#tempLoading").hide();$("#tempLoading").append(loadingDiv);openMap("<%=pdb%>","<%=energyCutoffSet%>");</script>
   </body>
 </html>

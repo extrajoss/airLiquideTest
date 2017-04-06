@@ -1,27 +1,38 @@
 var express = require('express');
-var app = express();
-var port = process.env.PORT || 8064;
+var config = require('./config');
 var ecache  = require('./server/ensureProcessingCache.js');
 
-app.use(express.static(__dirname + '/public'));
+var app = express();
+var port = config.web.port;
+var baseStatic = config.web.baseStatic;
+
+app.use(express.static(baseStatic));
 app.set('view engine','ejs');
 //app.engine('html', require('ejs').renderFile);
 
 app.get('/',function(req,res){
-  res.sendFile(__dirname + "/index.html");
+  //res.sendFile(__dirname + "/index.html");
+  res.redirect(config.web.googleSpreadsheet);
 });
 
 app.get(
-    '/getMaps/:pdb/',
-    function(req, res, next){        
-        ecache.checkFilesAndReturnJSON(req,res);
-    });
+    '/pdb/:pdb/',
+    function(req,res){
+        res.render(
+            "jolecule",
+            {
+                pdb:req.params.pdb,
+                energyCutoffSet:req.query.energyCutoffSet||Object.keys(config.jolecule.ENERGY_CUTOFF_SETS)[0]
+            }
+        ); 
+    }
+);
 
 app.get(
-    '/maps/:pdb/',
-    function(req, res, next){
-        res.render("jolecule",{pdb:req.params.pdb});
-    });
+    '/getMaps/:pdb/:energyCutoffSet/',
+    function(req, res, next){        
+        ecache.checkFilesAndReturnJSON(req,res);
+    });    
 
 var srv = app.listen(port, function(){
     console.log('"AirLiquideTest" listening on port: ' + port)

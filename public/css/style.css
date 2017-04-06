@@ -1,4 +1,18 @@
-body {width:100%; height:100%;}
+body {
+    margin: 0;
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+}
+#tempLoading {
+    background-color: #000;
+    width: 100%;
+    height: 100%;
+}
+#jolecule {
+    width: 100%;
+    height: 100%;
+}
 .loader {
     border: 5px solid #888888; /* Light grey */
     border-top: 5px solid #000000; /* Blue */

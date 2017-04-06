@@ -16,7 +16,7 @@
     "express": "^4.14.0",
     "request":"latest",
     "forever":"latest",
-    "babel": "latest"
+    "mkdirp": "latest"
   },
   "devDependencies": {
     "nodemon":"latest"

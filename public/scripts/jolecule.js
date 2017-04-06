@@ -339,12 +339,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	              if (protein_data['pdb_text'].length == 0) {
 	                message(_this3.params.loading_failure_html);
-					cleanup();
-	                return;
-	              }
-	
-	              _this3.protein.load(protein_data);
-	
+	              }else{
+					_this3.protein.load(protein_data);
+				  }	
 	              _this3.protein_display.nDataServer += 1;
 	
 	              if (_this3.protein.parsing_error) {
@@ -73140,13 +73137,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var _this8 = this;
 	
 	      console.log("make grid atoms", elem, this.scene.grid_atoms[elem]);
-	      var text_button = (0, _util.toggle_button)('toggle_text', elem, 'jolecule-button', function () {
+	      var text_button = (0, _util.toggle_button)('toggle_text', elem, 'jolecule-button-'+ elem, function () {
 	        return _this8.scene.grid_atoms[elem];
 	      }, function (b) {
 	        _this8.scene.grid_atoms[elem] = b;
-	        _this8.scene.changed = true;
+	        _this8.scene.changed = true;			
 	      });
-	      text_button.attr("style", "position: absolute; top: " + y + "px; left: 40px; width: 20px");
+		  var buttonColor = ElementColors[elem];
+	      text_button.attr("style", "position: absolute; top: " + y + "px; left: 40px; width: 30px;");
 	      return text_button;
 	    }
 	  }, {

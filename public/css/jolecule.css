@@ -12,6 +12,24 @@
     letter-spacing: 0.1em;
     line-height: 30px;
 }
+a.jolecule-button-He,
+a.jolecule-button-Ne,
+a.jolecule-button-Ar,
+a.jolecule-button-Kr,
+a.jolecule-button-Xe {
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+    text-align: center;
+    margin-right: 2px;
+    margin-bottom: 5px;
+    padding: 6px 6px;
+    background-color: #777;
+    font-size: 12px;
+    font-weight: normal;
+    letter-spacing: 0.1em;
+    line-height: 30px;
+    color: #9A9 !important;
+}
 .jolecule-residue-selector {
     height:16px;
     line-height:16px;
@@ -25,6 +43,26 @@ a.jolecule-button-toggle-on:link,
 a.jolecule-button-toggle-on:visited {
     background-color: #444; 
     color: #9A9 !important;
+}
+a.jolecule-button-He.jolecule-button-toggle-on {
+    background-color: #7b86c2;
+    color: #333 !important;
+}
+a.jolecule-button-Ne.jolecule-button-toggle-on {
+    background-color: #9ed2e4;
+    color: #333 !important;
+}
+a.jolecule-button-Ar.jolecule-button-toggle-on {
+    background-color: #5dc4be;
+    color: #333 !important;
+}
+a.jolecule-button-Kr.jolecule-button-toggle-on {
+    background-color: #acd376;
+    color: #333 !important;
+}
+a.jolecule-button-Xe.jolecule-button-toggle-on {
+    background-color: #f79f7c;
+    color: #333 !important;
 }
 a.jolecule-button input a,
 a.jolecule-button,
