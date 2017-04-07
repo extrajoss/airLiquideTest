@@ -1,42 +1,55 @@
 var joleculeHelpers = require('./joleculeHelpers.js');
 var processingCache = {};
 
-var getEnsureJoleculeIndex = function(jol){
-    if(processingCache[jol.pdb]){
-        console.log("Retreiving Promise from cache");
-    }else{
-        console.log("Assigning Promise to cache");
-        processingCache[jol.pdb] = jol.ensureJoleculeIndex();
-    }
-    return processingCache[jol.pdb];
-};
-
-var isPdb = function(pdb){
-    return pdb.match(/^\w{4}$/);
-};
-
 var checkFilesAndReturnJSON = function(req, res){
     var pdb = req.params.pdb;
     var energyCutoffSet = req.params.energyCutoffSet;
     var jol = joleculeHelpers.set(pdb,energyCutoffSet);
 
-    if(isPdb(pdb)){
-        getEnsureJoleculeIndex(jol)
-            .then(function(){
-                delete(processingCache[pdb]);
-                res.setHeader('Content-Type', 'application/json');
-                res.send(JSON.stringify({pdb:pdb,energyCutoffSet:energyCutoffSet,dataServerLocalPath:jol.paths.dataServerLocalPathClient}));
-            })
-            .catch(function(err){
-                delete(processingCache[pdb]);
-                console.error("An Error occured during file preparation: " + err);
-                res.send('{"ErrorText": "'+err+'"}');
-            });       
-    }else{
+    var isPdb = function(){
+        return pdb.match(/^\w{4}$/)?true:false;
+    };
+
+    var isEnergyCutoffSet = function(){
+            return Object.keys(jol.ENERGY_CUTOFF_SETS).indexOf(energyCutoffSet)>=0;
+    };
+
+    var getEnsureJoleculeIndex = function(jol){
+        if(processingCache[jol.pdb]){
+            console.log("Retreiving Promise from cache");
+        }else{
+            console.log("Assigning Promise to cache");
+            processingCache[jol.pdb] = jol.ensureJoleculeIndex();
+        }
+        return processingCache[jol.pdb];
+    };
+
+    if(!isPdb()){
         err = "'"+pdb+"' is not a valid PDB record";
         console.error(err);
-        res.send('{"ErrorText": "'+err+'"}');
+        res.setHeader('Content-Type', 'application/json');
+        res.send(JSON.stringify({ErrorText: err}));
+        return;
     }
+    if(!isEnergyCutoffSet()){
+        err = "'" + energyCutoffSet +"' is not a valid energyCutoffSet. (Try: " + Object.keys(jol.ENERGY_CUTOFF_SETS).join(",") + ")";
+        console.error(err);
+        res.setHeader('Content-Type', 'application/json');
+        res.send(JSON.stringify({ErrorText: err}));
+        return;
+    }
+    getEnsureJoleculeIndex(jol)
+        .then(function(){
+            delete(processingCache[pdb]);
+            res.setHeader('Content-Type', 'application/json');
+            res.send(JSON.stringify({pdb:pdb,energyCutoffSet:energyCutoffSet,dataServerLocalPath:jol.paths.dataServerLocalPathClient}));
+        })
+        .catch(function(err){
+            delete(processingCache[pdb]);
+            console.error("An Error occured during file preparation: " + err);
+            res.setHeader('Content-Type', 'application/json');
+            res.send(JSON.stringify({ErrorText: err}));
+        }); 
 };
 
 module.exports = {

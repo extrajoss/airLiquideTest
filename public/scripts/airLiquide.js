@@ -22,11 +22,11 @@ var loadingDiv2 = $("<div></div>").attr('id', 'temploading-message').css({
     'position':'absolute',
     'color': '#666' }).html(loadingText).resize();
 var openMap = function (pdb,energyCutoffSet){    
+    $("#tempLoading").show();
+    $("#jolecule").hide();
     if(pdb.length!=4){
+        $('#temploading-message').html(pdb + " is not a valid PDB. PDBs must be 4 characters long.");
         return;
-    }else{
-        $("#tempLoading").show();
-         $("#jolecule").hide();
     }
     $('#temploading-message').html(loadingText).resize();         
     $.getJSON({

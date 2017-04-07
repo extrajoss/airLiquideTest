@@ -32,9 +32,13 @@ app.get(
     '/getMaps/:pdb/:energyCutoffSet/',
     function(req, res, next){        
         ecache.checkFilesAndReturnJSON(req,res);
-    });    
+    });   
+
+app.use(function (req, res, next) {
+  res.status(404).render("404");
+}) 
 
 var srv = app.listen(port, function(){
-    console.log('"AirLiquideTest" listening on port: ' + port)
+    console.log('"AirLiquideTest" listening on port: ' + port);
 });
 
