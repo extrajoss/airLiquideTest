@@ -25,7 +25,7 @@ var openMap = function (pdb,energyCutoffSet){
     $("#tempLoading").show();
     $("#jolecule").hide();
     if(pdb.length!=4){
-        $('#temploading-message').html(pdb + " is not a valid PDB. PDBs must be 4 characters long.");
+        $('#temploading-message').html("'" +pdb + "' is not a valid PDB. PDBs must be 4 characters long.");
         return;
     }
     $('#temploading-message').html(loadingText).resize();         

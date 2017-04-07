@@ -15,15 +15,16 @@ var checkFilesAndReturnJSON = function(req, res){
     };
 
     var getEnsureJoleculeIndex = function(jol){
-        if(processingCache[jol.pdb]){
+        var cacheId = jol.pdb+jol.energyCutoffSet;
+        if(processingCache[cacheId]){
             console.log("Retreiving Promise from cache");
         }else{
             console.log("Assigning Promise to cache");
-            processingCache[jol.pdb] = jol.ensureJoleculeIndex();
+            processingCache[cacheId] = jol.ensureJoleculeIndex();
         }
-        return processingCache[jol.pdb];
+        return processingCache[cacheId];
     };
-
+    
     if(!isPdb()){
         err = "'"+pdb+"' is not a valid PDB record";
         console.error(err);
