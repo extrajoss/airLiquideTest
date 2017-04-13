@@ -5,6 +5,7 @@ var checkFilesAndReturnJSON = function(req, res){
     var pdb = req.params.pdb;
     var energyCutoffSet = req.params.energyCutoffSet;
     var jol = joleculeHelpers.set(pdb,energyCutoffSet);
+    var cacheId = jol.pdb+jol.energyCutoffSet;
 
     var isPdb = function(){
         return pdb.match(/^\w{4}$/)?true:false;
@@ -14,8 +15,7 @@ var checkFilesAndReturnJSON = function(req, res){
             return Object.keys(jol.ENERGY_CUTOFF_SETS).indexOf(energyCutoffSet)>=0;
     };
 
-    var getEnsureJoleculeIndex = function(jol){
-        var cacheId = jol.pdb+jol.energyCutoffSet;
+    var getEnsureJoleculeIndex = function(jol){        
         if(processingCache[cacheId]){
             console.log("Retreiving Promise from cache");
         }else{
@@ -41,12 +41,12 @@ var checkFilesAndReturnJSON = function(req, res){
     }
     getEnsureJoleculeIndex(jol)
         .then(function(){
-            delete(processingCache[pdb]);
+            delete(processingCache[cacheId]);
             res.setHeader('Content-Type', 'application/json');
             res.send(JSON.stringify({pdb:pdb,energyCutoffSet:energyCutoffSet,dataServerLocalPath:jol.paths.dataServerLocalPathClient}));
         })
         .catch(function(err){
-            delete(processingCache[pdb]);
+            delete(processingCache[cacheId]);
             console.error("An Error occured during file preparation: " + err);
             res.setHeader('Content-Type', 'application/json');
             res.send(JSON.stringify({ErrorText: err}));

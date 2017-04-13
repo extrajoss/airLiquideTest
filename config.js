@@ -9,7 +9,7 @@ config.web.googleSpreadsheet = "https://docs.google.com/spreadsheets/d/1o86skn1A
 
 config.jolecule.SPACIAL_CUTOFF = 2;
 config.jolecule.MAP_FILE_PATH = "http://hpc.csiro.au/users/272675/airliquide/mapfiles";
-config.jolecule.PDB_FILE_PATH = "https://files.rcsb.org/view";
+config.jolecule.PDB_FILE_PATH = "http://files.rcsb.org/pub/pdb/data/structures/divided/pdb";
 config.jolecule.PREPROCESSING_SCRIPT = __dirname + '/resources/jolecule/autodock2pdbES5.js';
 config.jolecule.JOL_STATIC_SCRIPT ='resources/jolecule/jol-static.js';
 config.jolecule.NOBLE_GAS_SYMBOLS = 
@@ -19,7 +19,8 @@ config.jolecule.ENERGY_CUTOFF_SETS = {
     "medium":       [-0.3,-0.3,-0.8,-0.8,-1.2],
     "low":          [-0.3,-0.3,-0.6,-0.6,-0.8],
     "-0.5":         [-0.5,-0.5,-0.5,-0.5,-0.5],
-    "-0.6":         [-0.6,-0.6,-0.6,-0.6,-0.6]
+    "-0.6":         [-0.6,-0.6,-0.6,-0.6,-0.6],
+    "veryHigh":     [-0.6,-0.6,-1.2,-1.2,-1.5],
 }
 
 module.exports = config;

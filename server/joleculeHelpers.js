@@ -11,6 +11,7 @@ var joleculeHelpers = function(pdb,energyCutoffSet){
     var fs = require('fs');
     var mkdirp = require('mkdirp');
     var request = require('request');
+    const zlib = require('zlib');
     var exports = {}; 
 
     const SPACIAL_CUTOFF = config.jolecule.SPACIAL_CUTOFF;
@@ -22,6 +23,7 @@ var joleculeHelpers = function(pdb,energyCutoffSet){
     const ENERGY_CUTOFF_SETS = config.jolecule.ENERGY_CUTOFF_SETS;
     const DATA_SERVER_FILE_NUMBERS = [0,1,2,3,4,5];
 
+    pdb = pdb.toLowerCase();
     exports.pdb = pdb;
     exports.energyCutoffSet = energyCutoffSet;
     exports.ENERGY_CUTOFF_SETS = ENERGY_CUTOFF_SETS;
@@ -32,7 +34,11 @@ var joleculeHelpers = function(pdb,energyCutoffSet){
     var mapLocalPath =function(nobleGas){ return  `${config.web.baseStatic}/data/${pdb}/maps/${nobleGas}`;}
     var mapFileLocalPath =function(nobleGas){ return  `${config.web.baseStatic}/data/${pdb}/maps/${nobleGas}/${pdb}.${nobleGas}.map`;}
 
-    var pdbFileRemotePath =function(){ return `${PDB_FILE_PATH}/${pdb}.pdb`;}
+    var pdbFileRemotePath =function(){
+        var pdbGroup = pdb.substring(1,3);
+         return `${PDB_FILE_PATH}/${pdbGroup}/pdb${pdb}.ent.gz`;
+        }
+    var pdbStructureFileLocalPath =function(){ return  `${config.web.baseStatic}/data/${pdb}/pdbs/pdb${pdb}.ent.gz`;}    
     var pdbFileLocalPath =function(){ return  `${config.web.baseStatic}/data/${pdb}/pdbs/${pdb}.pdb`;}
 
     var processedPdbLocalPath  =function(){ return  `${config.web.baseStatic}/data/${pdb}/pdbs/${energyCutoffSet}`;}
@@ -85,10 +91,19 @@ var joleculeHelpers = function(pdb,energyCutoffSet){
     var getPdbFile = function (){
         console.log("Checking for PDB file");
         var remoteFilePath = pdbFileRemotePath();
+        var localStructureFilePath = pdbStructureFileLocalPath()
         var localFilePath = pdbFileLocalPath();
-        return ensureFileWithRemoteFile(localFilePath,remoteFilePath)
+        return ensureFileWithRemoteFile(localStructureFilePath,remoteFilePath)
+            .then(function(){decompressGzFile(localStructureFilePath,localFilePath)})
             .catch(function(err){throw("Failed to find "+ pdb +" PDB File due to the following error: " + err)});
     };
+
+    var decompressGzFile = function(inputFile,outputFile){
+        const gzip = zlib.createGunzip();
+        const inp = fs.createReadStream(inputFile);
+        const out = fs.createWriteStream(outputFile);
+        inp.pipe(gzip).pipe(out);
+    }
 
     var getRemoteFile = function(localFilePath,remoteFilePath){
         return new Promise(function(resolve,reject){
@@ -113,6 +128,7 @@ var joleculeHelpers = function(pdb,energyCutoffSet){
             return Promise.resolve(localFilePath);
         }else{
             var localFileDir = path.dirname(localFilePath);
+            console.log(localFilePath +" does not exist creating directory "+localFileDir);
             ensureDirectorySync(localFileDir);   
             return getRemoteFile(localFilePath,remoteFilePath) 
                 .then(function(){

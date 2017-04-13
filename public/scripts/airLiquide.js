@@ -53,8 +53,8 @@ var displayJolecule = function(res) {
     var pdb = res.pdb;
     var energyCutoffSet = res.energyCutoffSet;  
     var dataServerLocalPath = res.dataServerLocalPath
-    $("#tempLoading").hide();
-    $("#jolecule").show();            
+    $("#jolecule").show();  
+    $("#tempLoading").hide();          
     require( 
             ['/scripts/jolecule.js', 
             dataServerLocalPath+"/data-server0.js", 
