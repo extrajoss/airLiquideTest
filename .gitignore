@@ -3,3 +3,5 @@ maps/
 pdbs/
 dataServers/
 node_modules/
+.DS_Store
+.gitignore

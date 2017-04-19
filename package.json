@@ -4,7 +4,7 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "babel":"babel",
+    "babel": "babel",
     "start": "nodemon",
     "start:development": "nodemon",
     "start:production": "node server.js"
@@ -12,14 +12,15 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "ejs":"latest",
-    "express": "^4.14.0",
-    "request":"latest",
-    "forever":"latest",
+    "ejs": "latest",
+    "express": "latest",
+    "request": "latest",
+    "forever": "latest",
     "mkdirp": "latest",
-    "zlib":"latest"
+    "object-sizeof":"latest"
   },
   "devDependencies": {
-    "nodemon":"latest"
+    "babel-cli": "^6.24.1",
+    "nodemon": "latest"
   }
 }

@@ -57,12 +57,12 @@ var displayJolecule = function(res) {
     $("#tempLoading").hide();          
     require( 
             ['/scripts/jolecule.js', 
-            dataServerLocalPath+"/data-server0.js", 
-            dataServerLocalPath+"/data-server1.js", 
-            dataServerLocalPath+"/data-server2.js", 
-            dataServerLocalPath+"/data-server3.js", 
-            dataServerLocalPath+"/data-server4.js", 
-            dataServerLocalPath+"/data-server5.js"], 
+            dataServerLocalPath+"/0/", 
+            dataServerLocalPath+"/1/", 
+            dataServerLocalPath+"/2/", 
+            dataServerLocalPath+"/3/",  
+            dataServerLocalPath+"/4/",  
+            dataServerLocalPath+"/5/"], 
             function(jolecule, dataServer0, dataServer1, dataServer2, dataServer3, dataServer4, dataServer5) {                  
         jolecule.initEmbedJolecule({
             div_tag: '#jolecule',

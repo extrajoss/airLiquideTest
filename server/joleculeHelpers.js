@@ -47,6 +47,8 @@ var joleculeHelpers = function(pdb,energyCutoffSet){
     var dataServerLocalPathClient =function(){ return  `/data/${pdb}/dataServers/${energyCutoffSet}`;}
     var dataServerLocalPath =function(){ return  `${config.web.baseStatic}/data/${pdb}/dataServers/${energyCutoffSet}`;}
     var dataServerFileLocalPath =function(i){ return  `${config.web.baseStatic}/data/${pdb}/dataServers/${energyCutoffSet}/data-server${i}.js`;}
+    var dataServerRoute =function(){ return  `/data/${pdb}/${energyCutoffSet}`;}
+    
 
     exports.paths = {
         "mapFileRemotePaths":NOBLE_GAS_SYMBOLS.map(mapFileRemotePath),
@@ -59,9 +61,10 @@ var joleculeHelpers = function(pdb,energyCutoffSet){
         "dataServerLocalPathClient":dataServerLocalPathClient(),
         "dataServerLocalPath":dataServerLocalPath(),
         "dataServerFileLocalPaths":DATA_SERVER_FILE_NUMBERS.map(dataServerFileLocalPath),
+        "dataServerRoute":dataServerRoute(),
     };
 
-    exports.ensureJoleculeIndex = function(){
+    exports.ensureJoleculeDataServers = function(){
             return ensureLocalFiles()
             .then(ensurePreProcessingFiles)
             .then(ensureJoleculeStatic);
@@ -207,12 +210,12 @@ var joleculeHelpers = function(pdb,energyCutoffSet){
     var ensureJoleculeStatic = function(){
         console.log("Checking for Static files");
         if(checkJoleculeStaticFiles()){
-            return Promise.resolve();
+            return getDataServers();
         }else{
             return runJoleculeStatic()
                 .then(function(){
                     if(checkJoleculeStaticFiles()){
-                        return Promise.resolve();
+                        return getDataServers();
                     }else{
                         throw("Static script succeeded but Static Files not generated");
                     }
@@ -220,6 +223,28 @@ var joleculeHelpers = function(pdb,energyCutoffSet){
                 .catch(function(err){throw("Failed to Build Jolecule Data_Server due to the following error: " + err)});
         }
     };
+
+    var getDataServers = function(){
+        dataServerPromises = [];
+        for(i=0;i<=5;i++){
+            dataServerPromises.push(getDataServer(i));
+        } 
+        return Promise.all(dataServerPromises);
+    }
+
+    var getDataServer = function(fileIndex){
+        var localFilePath = dataServerFileLocalPath(fileIndex);
+        return new Promise(function(resolve,reject){
+            fs.readFile(localFilePath, function (err, data ) {
+                if(err){
+                    reject(error);
+                }else{
+                    resolve(data);
+                }
+            });
+        });
+    }
+
 
     var checkJoleculeStaticFiles = function(){
         result = true;       

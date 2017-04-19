@@ -34,6 +34,26 @@ app.get(
         ecache.checkFilesAndReturnJSON(req,res);
     });   
 
+app.get(
+    '/flushCache/:pdb/:energyCutoffSet/',
+    function(req, res, next){
+        ecache.flushCache(req,res);
+    });
+
+app.get(
+    '/data/:pdb/:energyCutoffSet/:index/',
+    function(req, res, next){     
+        ecache.retrieveCache(req,res)
+            .then(function(dataServer){
+                res.setHeader('content-type', 'text/javascript');
+                res.write(dataServer);
+                res.end();
+            })
+            .catch(function(err){
+                    res.status(404).send(err);
+            });
+    });   
+
 app.use(function (req, res, next) {
   res.status(404).render("404");
 }) 
