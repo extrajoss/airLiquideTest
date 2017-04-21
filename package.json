@@ -17,6 +17,7 @@
     "request": "latest",
     "forever": "latest",
     "mkdirp": "latest",
+    "fs-extra": "latest",
     "object-sizeof":"latest"
   },
   "devDependencies": {

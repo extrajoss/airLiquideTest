@@ -8,14 +8,14 @@ var joleculeHelpers = function(pdb,energyCutoffSet){
     var config = require('../config');
     var childProcess = require("child_process");
     var path = require('path');
-    var fs = require('fs');
-    var mkdirp = require('mkdirp');
+    var fs = require('fs-extra');
     var request = require('request');
     const zlib = require('zlib');
     var exports = {}; 
 
     const SPACIAL_CUTOFF = config.jolecule.SPACIAL_CUTOFF;
     const MAP_FILE_PATH = config.jolecule.MAP_FILE_PATH;
+    const MAP_SHARED_FILE_PATH = config.jolecule.MAP_SHARED_FILE_PATH;
     const PDB_FILE_PATH = config.jolecule.PDB_FILE_PATH;
     const PREPROCESSING_SCRIPT = config.jolecule.PREPROCESSING_SCRIPT;
     const JOL_STATIC_SCRIPT =config.jolecule.JOL_STATIC_SCRIPT;
@@ -30,7 +30,11 @@ var joleculeHelpers = function(pdb,energyCutoffSet){
 
     var energyCutoffs = ENERGY_CUTOFF_SETS[energyCutoffSet];
 
+    var baseLocalPath =function(){ return  `${config.web.baseStatic}/data/${pdb}`;}
+
     var mapFileRemotePath =function(nobleGas){ return `${MAP_FILE_PATH}/${pdb}/${pdb}.${nobleGas}.map`;}
+    var mapSharedPath =function(nobleGas){  if(MAP_SHARED_FILE_PATH){return `${MAP_SHARED_FILE_PATH}/${pdb}`;}else{return false;} }
+    var mapFileSharedPath =function(nobleGas){ if(MAP_SHARED_FILE_PATH){return `${MAP_SHARED_FILE_PATH}/${pdb}/${pdb}.${nobleGas}.map`;}else{return false;}}
     var mapLocalPath =function(nobleGas){ return  `${config.web.baseStatic}/data/${pdb}/maps/${nobleGas}`;}
     var mapFileLocalPath =function(nobleGas){ return  `${config.web.baseStatic}/data/${pdb}/maps/${nobleGas}/${pdb}.${nobleGas}.map`;}
 
@@ -47,7 +51,7 @@ var joleculeHelpers = function(pdb,energyCutoffSet){
     var dataServerLocalPathClient =function(){ return  `/data/${pdb}/dataServers/${energyCutoffSet}`;}
     var dataServerLocalPath =function(){ return  `${config.web.baseStatic}/data/${pdb}/dataServers/${energyCutoffSet}`;}
     var dataServerFileLocalPath =function(i){ return  `${config.web.baseStatic}/data/${pdb}/dataServers/${energyCutoffSet}/data-server${i}.js`;}
-    var dataServerRoute =function(){ return  `/data/${pdb}/${energyCutoffSet}`;}
+    var dataServerRoute =function(){ return  `/data/${energyCutoffSet}/${pdb}`;}
     
 
     exports.paths = {
@@ -62,6 +66,7 @@ var joleculeHelpers = function(pdb,energyCutoffSet){
         "dataServerLocalPath":dataServerLocalPath(),
         "dataServerFileLocalPaths":DATA_SERVER_FILE_NUMBERS.map(dataServerFileLocalPath),
         "dataServerRoute":dataServerRoute(),
+        "baseLocalPath":baseLocalPath(),
     };
 
     exports.ensureJoleculeDataServers = function(){
@@ -86,8 +91,9 @@ var joleculeHelpers = function(pdb,energyCutoffSet){
 
     var getMapFile = function(nobleGas) {
         var remoteFilePath = mapFileRemotePath(nobleGas);
-        var localFilePath = mapFileLocalPath(nobleGas);   
-        return ensureFileWithRemoteFile(localFilePath,remoteFilePath)
+        var sharedFilePath = mapFileSharedPath(nobleGas);
+        var localFilePath = mapFileLocalPath(nobleGas);  
+        return ensureFileWithRemoteFile(localFilePath,remoteFilePath,sharedFilePath)
             .catch(function(err){throw("Failed to find " + nobleGas + " Map File due to the following error: " + err)});
     };
 
@@ -126,44 +132,28 @@ var joleculeHelpers = function(pdb,energyCutoffSet){
         });
     }
 
-    var ensureFileWithRemoteFile = function (localFilePath,remoteFilePath){
-        if (fs.existsSync(localFilePath)){
+    var ensureFileWithRemoteFile = function (localFilePath,remoteFilePath,sharedFilePath){
+        if (fs.existsSync(sharedFilePath)){
+            return Promise.resolve(sharedFilePath);
+        }else if (fs.existsSync(localFilePath)){
             return Promise.resolve(localFilePath);
         }else{
             var localFileDir = path.dirname(localFilePath);
             console.log(localFilePath +" does not exist creating directory "+localFileDir);
-            ensureDirectorySync(localFileDir);   
+            ensureDirectorySync(localFileDir);  
             return getRemoteFile(localFilePath,remoteFilePath) 
-                .then(function(){
-                    if (fs.existsSync(localFilePath)){
-                        return localFilePath;
-                    }else{
-                        throw("Failed to create "+ localFilePath + " from "+ remoteFilePath);
-                    }
-                });
+                    .then(function(){
+                        if (fs.existsSync(localFilePath)){
+                            return localFilePath;
+                        }else{
+                            throw("Failed to create "+ localFilePath + " from "+ remoteFilePath);
+                        }
+                    });
         }   
     };
 
     var ensureDirectorySync = function (directory) {  
-        try {
-            fs.statSync(directory);
-        } catch(e) {
-            mkdirp(
-                directory,
-                function (err) {
-                    if (err) console.error(err)
-                }
-            );
-        }
-    };
-
-    var checkDirectorySync = function (directory) {  
-        try {
-            fs.statSync(directory);
-            return true;
-        } catch(e) {
-            return false;
-        }
+        fs.ensureDirSync(directory);
     };
 
     var getProcessedPDBFiles = function(){
@@ -204,7 +194,12 @@ var joleculeHelpers = function(pdb,energyCutoffSet){
     }
 
     var runJoleculePreProcessing = function(nobleGas,energyCutoff){
-        return runScriptAsync(PREPROCESSING_SCRIPT,[ "-u", energyCutoff,"-s", SPACIAL_CUTOFF,"-o",processedPdbLocalPath()+"/", pdb],{cwd:mapLocalPath(nobleGas)+'/'});
+        var sharedPath = mapSharedPath(nobleGas);
+        var localPath = mapLocalPath(nobleGas);  
+        if (sharedPath){
+            localPath = sharedPath;
+        } 
+        return runScriptAsync(PREPROCESSING_SCRIPT,[ "-e", nobleGas,"-u", energyCutoff,"-s", SPACIAL_CUTOFF,"-o",processedPdbLocalPath()+"/", pdb],{cwd:localPath+'/'});
     };
 
     var ensureJoleculeStatic = function(){
@@ -278,6 +273,7 @@ var joleculeHelpers = function(pdb,energyCutoffSet){
     var runScript = function (scriptPath,args,options, success, fail) {
         var invoked = false;
         var process = childProcess.fork(scriptPath,args,options);
+        //console.log(scriptPath,args,options);
         process.on('error', function (err) {
             if (invoked) return;
             invoked = true;            

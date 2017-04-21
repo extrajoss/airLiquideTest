@@ -30,7 +30,7 @@ var openMap = function (pdb,energyCutoffSet){
     }
     $('#temploading-message').html(loadingText).resize();         
     $.getJSON({
-        url: "/getMaps/"+pdb+"/"+energyCutoffSet+"/",
+        url: "/getMaps/"+energyCutoffSet+"/"+pdb+"/",
         success: displayJolecule
     })
     .fail(function(err) {
@@ -52,18 +52,19 @@ var displayJolecule = function(res) {
     console.log("displayJolecule",res);
     var pdb = res.pdb;
     var energyCutoffSet = res.energyCutoffSet;  
-    var dataServerLocalPath = res.dataServerLocalPath
+    var dataServerRoute = res.dataServerRoute
     $("#jolecule").show();  
     $("#tempLoading").hide();          
     require( 
             ['/scripts/jolecule.js', 
-            dataServerLocalPath+"/0/", 
-            dataServerLocalPath+"/1/", 
-            dataServerLocalPath+"/2/", 
-            dataServerLocalPath+"/3/",  
-            dataServerLocalPath+"/4/",  
-            dataServerLocalPath+"/5/"], 
-            function(jolecule, dataServer0, dataServer1, dataServer2, dataServer3, dataServer4, dataServer5) {                  
+            dataServerRoute+"/0/", 
+            dataServerRoute+"/1/", 
+            dataServerRoute+"/2/", 
+            dataServerRoute+"/3/",  
+            dataServerRoute+"/4/",  
+            dataServerRoute+"/5/"], 
+            function(jolecule, dataServer0, dataServer1, dataServer2, dataServer3, dataServer4, dataServer5) {  
+                console.log({"dataServer0":dataServer0, "dataServer1":dataServer1, "dataServer2":dataServer2, "dataServer3":dataServer3, "dataServer4":dataServer4, "dataServer5":dataServer5});                
         jolecule.initEmbedJolecule({
             div_tag: '#jolecule',
             data_servers: [dataServer0, dataServer1, dataServer2, dataServer3, dataServer4, dataServer5],
