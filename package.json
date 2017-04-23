@@ -1,17 +1,27 @@
 {
-  "name": "basicnode",
+  "name": "air_liquide_test",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
-    "start": "node airLiquide.js"
+    "babel": "babel",
+    "start": "nodemon",
+    "start:development": "nodemon",
+    "start:production": "node server.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.14.0",
-    "request":"latest"
+    "ejs": "latest",
+    "express": "latest",
+    "request": "latest",
+    "forever": "latest",
+    "mkdirp": "latest",
+    "fs-extra": "latest",
+    "object-sizeof":"latest"
   },
   "devDependencies": {
+    "babel-cli": "^6.24.1",
+    "nodemon": "latest"
   }
 }

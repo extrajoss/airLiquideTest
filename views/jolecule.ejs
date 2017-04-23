@@ -1,0 +1,22 @@
+<html>
+  <head>
+      <title><%=pdb%> - Air Liquide Test</title>
+      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+      <link rel="stylesheet" type="text/css" href="/css/style.css">
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+      <script src="/scripts/airLiquide.js"></script>
+          <meta name="viewport" 
+        content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0"/>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <!--<link rel="stylesheet" type="text/css" href="/css/full-page-jolecule.css"/>-->
+    <link rel="stylesheet" type="text/css" href="/css/jolecule.css"/>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+  </head>
+  <body>  
+    <div id="tempLoading"></div>
+    <div id="jolecule"></div>
+    <script src="/scripts/require.js"></script>  
+    <script>$("#tempLoading").append(loadingDiv);openMap("<%=pdb%>","<%=energyCutoffSet%>");</script>
+  </body>
+</html>
