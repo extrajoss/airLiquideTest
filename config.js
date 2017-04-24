@@ -5,8 +5,9 @@ config.web = {};
 
 config.web.port = process.env.WEB_PORT || 8064;    
 config.web.baseStatic = __dirname + '/public';
-config.web.googleSpreadsheet = "https://docs.google.com/spreadsheets/d/1o86skn1Aycf4wNdo00FVSlK5xEX1V8WugkSrpPrmIH0/edit?ts=58e3a5de#gid=448796123";
-config.web.MAX_CACHE_SIZE = 300;
+config.web.proteinListGoogleSpreadsheet = "https://docs.google.com/spreadsheets/d/1o86skn1Aycf4wNdo00FVSlK5xEX1V8WugkSrpPrmIH0/edit?ts=58e3a5de#gid=448796123";
+config.web.helpGoogleDocument = "https://docs.google.com/document/d/1jLpzLvHNIwmnzuLMfgerGgbYSdKGLez2ivL3ViTULss/pub";
+config.web.MAX_CACHE_SIZE = 300000;
 
 config.jolecule.SPACIAL_CUTOFF = 2;
 config.jolecule.MAP_FILE_PATH = "http://hpc.csiro.au/users/272675/airliquide/mapfiles";

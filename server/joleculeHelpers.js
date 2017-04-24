@@ -51,7 +51,7 @@ var joleculeHelpers = function(pdb,energyCutoffSet){
     var dataServerLocalPathClient =function(){ return  `/data/${pdb}/dataServers/${energyCutoffSet}`;}
     var dataServerLocalPath =function(){ return  `${config.web.baseStatic}/data/${pdb}/dataServers/${energyCutoffSet}`;}
     var dataServerFileLocalPath =function(i){ return  `${config.web.baseStatic}/data/${pdb}/dataServers/${energyCutoffSet}/data-server${i}.js`;}
-    var dataServerRoute =function(){ return  `/data/${energyCutoffSet}/${pdb}`;}
+    var dataServerRoute =function(){ return  `/data/${pdb}/${energyCutoffSet}`;}
     
 
     exports.paths = {

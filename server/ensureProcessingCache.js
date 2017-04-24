@@ -112,7 +112,7 @@ var checkFilesAndReturnJSON = function(req, res){
     getDataServersFromCache(jol)
         .then(function(dataServers){
             res.setHeader('Content-Type', 'application/json');
-            res.send(JSON.stringify({pdb:pdb,energyCutoffSet:energyCutoffSet,dataServerRoute:jol.paths.dataServerRoute}));
+            res.send(JSON.stringify({pdb:pdb,cutoff:energyCutoffSet,dataServerRoute:jol.paths.dataServerRoute}));
         })
         .catch(function(err){
             console.error("An Error occured during file preparation: " + err);

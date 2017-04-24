@@ -10,44 +10,40 @@ app.use(express.static(baseStatic));
 app.set('view engine','ejs');
 
 app.get('/',function(req,res){
-  res.redirect(config.web.googleSpreadsheet);
+  res.redirect(config.web.proteinListGoogleSpreadsheet);
+});
+
+app.get('/help',function(req,res){
+  res.redirect(config.web.helpGoogleDocument);
 });
 
 app.get(
-    '/pdb/:pdb/',
-    function(req,res){
-        var defaultEnergyCutoffSet = Object.keys(config.jolecule.ENERGY_CUTOFF_SETS)[0];
-        res.redirect('/pdb/'+defaultEnergyCutoffSet+'/'+req.params.pdb);
-    }
-);
-
-app.get(
-    '/pdb/:energyCutoffSet/:pdb/',
+    '/:pdb/',
     function(req,res){
         res.render(
             "jolecule",
             {
                 pdb:req.params.pdb,
-                energyCutoffSet:req.params.energyCutoffSet
+                energyCutoffSet:req.query.cutoff||Object.keys(config.jolecule.ENERGY_CUTOFF_SETS)[0]
             }
         ); 
     }
 );
 
 app.get(
-    '/getMaps/:energyCutoffSet/:pdb/',
+    '/getMaps/:pdb/:energyCutoffSet/',
     function(req, res, next){        
         ecache.checkFilesAndReturnJSON(req,res);
     });   
 
 app.get(
-    '/flushCache/:energyCutoffSet/:pdb/',
+    '/flushCache/:pdb/:energyCutoffSet/',
     function(req, res, next){
         ecache.flushCache(req,res);
     });
 
 app.get(
-    '/data/:energyCutoffSet/:pdb/:index/',
+    '/data/:pdb/:energyCutoffSet/:index/',
     function(req, res, next){     
         ecache.retrieveCache(req,res)
             .then(function(dataServer){

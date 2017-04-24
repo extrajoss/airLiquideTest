@@ -30,7 +30,7 @@ var openMap = function (pdb,energyCutoffSet){
     }
     $('#temploading-message').html(loadingText).resize();         
     $.getJSON({
-        url: "/getMaps/"+energyCutoffSet+"/"+pdb+"/",
+        url: "/getMaps/"+pdb+"/"+energyCutoffSet+"/",
         success: displayJolecule
     })
     .fail(function(err) {
@@ -51,8 +51,12 @@ var displayJolecule = function(res) {
     }
     console.log("displayJolecule",res);
     var pdb = res.pdb;
-    var energyCutoffSet = res.energyCutoffSet;  
+    var cutoff = res.cutoff;  
     var dataServerRoute = res.dataServerRoute
+    if (history.pushState) {
+        var newurl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?cutoff='+cutoff;
+        window.history.pushState({path:newurl},'',newurl);
+    }
     $("#jolecule").show();  
     $("#tempLoading").hide();          
     require( 
