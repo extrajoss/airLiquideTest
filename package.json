@@ -18,7 +18,8 @@
     "forever": "latest",
     "mkdirp": "latest",
     "fs-extra": "latest",
-    "object-sizeof":"latest"
+    "object-sizeof":"latest",
+    "numeral":"latest"
   },
   "devDependencies": {
     "babel-cli": "^6.24.1",

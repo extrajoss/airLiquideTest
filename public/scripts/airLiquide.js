@@ -1,4 +1,4 @@
-var loadingText = '<div style="display: inline-block">Checking file requirements.<br/>This may takes several minutes.</div> <div class="loader" style="display: inline-block"></div>';
+var loadingText = '<div style="display: inline-block">Checking file requirements.<br/>This may take several minutes.</div> <div class="loader" style="display: inline-block"></div>';
 var loadingDiv = $("<div></div>").attr('id', 'temploading-message').css({
     'z-index': 5000,
     'background-color': 'rgba(60, 60, 60, 0.75)',

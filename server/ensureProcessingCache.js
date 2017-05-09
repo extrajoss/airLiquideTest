@@ -32,14 +32,6 @@ var checkFilesAndReturnJSON = function(req, res){
     var jol = joleculeHelpers.set(pdb,energyCutoffSet);
     var cacheId = jol.pdb + "_" + jol.energyCutoffSet;
 
-    var isPdb = function(){
-        return pdb.match(/^\w{4}$/)?true:false;
-    };
-
-    var isEnergyCutoffSet = function(){
-            return Object.keys(jol.ENERGY_CUTOFF_SETS).indexOf(energyCutoffSet)>=0;
-    };
-
     var trimCache = function(){
         if(sizeof(dataServersCaches)>config.web.MAX_CACHE_SIZE){
             console.log("Removing "+dataServerCacheIdToRemove+ " from cache as cache ["+sizeof(dataServersCaches)+"] has exceeded maximum size of: "+ config.web.MAX_CACHE_SIZE);
@@ -95,14 +87,14 @@ var checkFilesAndReturnJSON = function(req, res){
         return dataServersCaches[cacheId].dataServers;
     };
     
-    if(!isPdb()){
+    if(!jol.isPdb()){
         err = "'"+pdb+"' is not a valid PDB record";
         console.error(err);
         res.setHeader('Content-Type', 'application/json');
         res.send(JSON.stringify({ErrorText: err}));
         return;
     }
-    if(!isEnergyCutoffSet()){
+    if(!jol.isEnergyCutoffSet()){
         err = "'" + energyCutoffSet +"' is not a valid energyCutoffSet. (Try: " + Object.keys(jol.ENERGY_CUTOFF_SETS).join(",") + ")";
         console.error(err);
         res.setHeader('Content-Type', 'application/json');

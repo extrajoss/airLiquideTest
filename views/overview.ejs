@@ -1,0 +1,63 @@
+<html>
+  <head>
+      <title>group18 - Interaction of noble gases with proteins</title>
+      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+      <link rel="stylesheet" type="text/css" href="/css/style.css">
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+      <script src="/scripts/airLiquide.js"></script>
+          <meta name="viewport" 
+        content="width=device-width, initial-scale=1"/>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+  </head>
+  <body>  
+    <div class="content">
+      <div class="date_published">April 24, 2017</div>
+      <h1>group18 <span>Interaction of noble gases with proteins</span></h1>
+    <q>So, gone … is the justification for “inert.” now known collectively as the noble gases, a name intended to imply a kind of chemical aloofness rather than a rigorous chastity</q>
+<div class="quote_source">— Peter William Atkins: In The Periodic Kingdom: A Journey Into the Land of the Chemical Elements (1995), 9.</div>
+<h2>Overview</h2>
+<p>The project aims to display likely interactions between noble gases and a set of candidate protein structures.</p>
+<h2>Specifications</h2>
+<p>You can access the data via a set of external google spreadsheets</a></br>
+<table class="googleSpreadSheetMap">
+  <tr><th>Element</th><th >Ligand</th><th >High</th><th >Med.</th><th >Low</th></tr>
+  <% Object.keys(proteinListGoogleSpreadsheet).forEach(function(element) { %>
+  <tr><th rowspan=2 class="element-<%=element%>"><%=element%></th><th>+</th>
+    <%var ligand = "withLigand";
+      Object.keys(proteinListGoogleSpreadsheet[element][ligand]).forEach(function(energy) {
+        var link = proteinListGoogleSpreadsheet[element][ligand][energy];%>
+  <td><a href="<%=link%>" title="<%=element%> <%=ligand%> <%=energy%>">⇲</a>
+  <% });%>
+  </tr>
+  <tr><th>-</th>
+  <% ligand = "withoutLigand";
+    Object.keys(proteinListGoogleSpreadsheet[element][ligand]).forEach(function(energy) {
+        var link = proteinListGoogleSpreadsheet[element][ligand][energy];%>
+        <td><a href="<%=link%>" title="<%=element%> <%=ligand%> <%=energy%>">⇲</a>
+  <% });
+  }); %>
+</table>
+To access the PDBs with different Energy Cutoff sets, the general form is:</br>
+<%=baseWebsite%>/{pdb}?cutoff={energyCutoffSet}</br>
+Replace {pdb} with the 4 letter pdb accession eg "2bmm"</br>
+Replace {energyCutoffSet} with either "high","medium","low","veryHigh" or # between -0.5 and -2.0</br>
+The values for the energyCutoffSets are in the order ["He","Ne","Ar","Kr","Xe"] and can be seen below:</br>
+<ul>
+<li>"high":         [-0.4,-0.4,-0.9,-0.9,-1.3],</li>
+<li>"medium":       [-0.3,-0.3,-0.8,-0.8,-1.2],</li>
+<li>"low":          [-0.3,-0.3,-0.6,-0.6,-0.8],</li>
+<li>"veryHigh":     [-0.6,-0.6,-1.2,-1.2,-1.5]</li>
+</ul>
+The default cutoff used is "high" so:</br>
+<a href="<%=baseWebsite%>/2bmm"><%=baseWebsite%>/2bmm</a> will redirect to the default <a href="<%=baseWebsite%>/2bmm?cutoff=high"><%=baseWebsite%>/2bmm?cutoff=high</a></br>
+<a href="<%=baseWebsite%>/2bmm?cutoff=-0.6"><%=baseWebsite%>/2bmm?cutoff=-0.6</a> will use -0.6 across the board.</br>
+Eg: "-0.5" is equivalent to [-0.5,-0.5,-0.5,-0.5,-0.5]</br>
+Numbers will round to the nearest 1 decimal place.</br>
+Eg "-0.6432" would result in [-0.6,-0.6,-0.6,-0.6,-0.6]
+</p>
+</div>
+  </body>
+</html>
+
+

@@ -4,6 +4,56 @@ body {
     width: 100%;
     height: 100%;
 }
+
+q{
+    font-style: italic;
+}
+h1 span{
+    font-size: 0.7em;
+    color:#333333;
+}
+
+div.content{
+    margin:5%;
+}
+div.date_published{
+    text-align: right;
+}
+table.googleSpreadSheetMap{
+    text-align: center;
+    margin: 0.5em;
+        border:solid 0.2em #333333;
+}
+table.googleSpreadSheetMap th{
+    text-align: center;
+    border:solid 0.2em #333333;
+    padding: 0.5em;
+}
+table.googleSpreadSheetMap td{
+    text-align: center;
+    border:solid 0.1em #666666;
+    padding: 0.5em;
+}
+.element-He {
+    background-color: #9ed2e4;
+    color: #333 !important;
+}
+.element-Ne {
+    background-color: #f79f7c;
+    color: #333 !important;
+}
+.element-Ar {
+    background-color: #7b86c2;
+    color: #333 !important;
+}
+.element-Kr {
+    background-color: #acd376;
+    color: #333 !important;
+}
+.element-Xe {
+    background-color: #5DC4BE;
+    color: #333 !important;
+}
 #tempLoading {
     background-color: #000;
     width: 100%;

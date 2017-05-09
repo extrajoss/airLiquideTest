@@ -9,13 +9,17 @@ var baseStatic = config.web.baseStatic;
 app.use(express.static(baseStatic));
 app.set('view engine','ejs');
 
-app.get('/',function(req,res){
-  res.redirect(config.web.proteinListGoogleSpreadsheet);
-});
-
-app.get('/help',function(req,res){
-  res.redirect(config.web.helpGoogleDocument);
-});
+app.get('/',
+    function(req,res){
+        res.render(
+            "overview",
+            {
+                proteinListGoogleSpreadsheet:config.web.proteinListGoogleSpreadsheet,
+                baseWebsite:config.web.baseWebsite
+            }
+        ); 
+    }
+);
 
 app.get(
     '/:pdb/',
@@ -57,7 +61,7 @@ app.get(
     });   
 
 app.use(function (req, res, next) {
-  res.status(404).render("404");
+   res.redirect('/');
 }) 
 
 var srv = app.listen(port, function(){
