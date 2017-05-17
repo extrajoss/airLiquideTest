@@ -8,6 +8,9 @@ config.web.baseWebsite = 'http://group18.csiro.au';
 config.web.baseStatic = __dirname + '/public';
 config.web.proteinListGoogleSpreadsheet = {
     "He":{
+        elementName:"Helium",
+        atomicNumber:"2",
+        atomicWeight:"4.003",
         withLigand:{
             "high":"https://drive.google.com/open?id=1DjmSc7hcU_NUspzmpL5na9xlCoTMZRj6F8HrE_luOvI",
             "medium":"https://drive.google.com/open?id=1_KsJ8uULHAiE3hWbb1A1LqjYefPejRzh4iC697a3G2U",
@@ -20,6 +23,9 @@ config.web.proteinListGoogleSpreadsheet = {
         }
     },
     "Ne":{
+        elementName:"Neon",
+        atomicNumber:"10",
+        atomicWeight:"28.180",
         withLigand:{
             "high":"https://drive.google.com/open?id=1CJ6hPp24L2UXzYL8d7E5-loBaeMU0-hY_HdmA1k60Mc",
             "medium":"https://drive.google.com/open?id=1OcycyEPE_aug0Ee7__vkstc6OATZ8fVpRU_NamnREDs",
@@ -32,6 +38,9 @@ config.web.proteinListGoogleSpreadsheet = {
         }
     },
     "Ar":{
+        elementName:"Argon",
+        atomicNumber:"18",
+        atomicWeight:"39.948",
         withLigand:{
             "high":"https://drive.google.com/open?id=1EDifQLe6Abq2Y9QawFXLoGJoUBHusvSXGjJXFagN2us",
             "medium":"https://drive.google.com/open?id=1x_M3Bd1Xjsxfhw0TwSSOLfrMBtHuar96a8dRejlRe1E",
@@ -44,6 +53,9 @@ config.web.proteinListGoogleSpreadsheet = {
         }
     },
     "Kr":{
+        elementName:"Krypton",
+        atomicNumber:"36",
+        atomicWeight:"84.80",
         withLigand:{
             "high":"https://drive.google.com/open?id=18qyU7zoDVqAVNNnFlagyNMLMsy0sX8iZtXCvqdTxzyk",
             "medium":"https://drive.google.com/open?id=1flAMUVIhgRdaKZ89c-xnLEmrxkf_hRAjbcJn43--O64",
@@ -56,6 +68,9 @@ config.web.proteinListGoogleSpreadsheet = {
         }
     },
     "Xe":{
+        elementName:"Xenon",
+        atomicNumber:"54",
+        atomicWeight:"131.29",
         withLigand:{
             "high":"https://drive.google.com/open?id=1E3GwjzKbin2jZoGAmlCX1auU1b69YPYJ-kLuEtXX4uk",
             "medium":"https://drive.google.com/open?id=1q8Fi4Z3jPqbNfBYIHKuU_7euuCwxkjngXEWpL9NqcW4",
@@ -73,7 +88,7 @@ config.web.MAX_CACHE_SIZE = 500000;
 
 config.jolecule.SPACIAL_CUTOFF = 2;
 config.jolecule.MAP_FILE_PATH = "http://hpc.csiro.au/users/272675/airliquide/mapfiles";
-//config.jolecule.MAP_SHARED_FILE_PATH = "//OSM/CBR/MFG_AIRLIQUIDE/work/web/mapfiles";
+config.jolecule.MAP_SHARED_FILE_PATH = "//OSM/CBR/MFG_AIRLIQUIDE/work/web/mapfiles";
 config.jolecule.PDB_FILE_PATH = "http://files.rcsb.org/pub/pdb/data/structures/divided/pdb";
 config.jolecule.PREPROCESSING_SCRIPT = __dirname + '/resources/jolecule/autodock2pdbES5.js';
 config.jolecule.JOL_STATIC_SCRIPT ='resources/jolecule/jol-static.js';

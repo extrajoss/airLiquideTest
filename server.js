@@ -11,6 +11,12 @@ app.set('view engine','ejs');
 
 app.get('/',
     function(req,res){
+        if(req.query.pdb && req.query.pdb.length == 4 ){
+            res.redirect('/'+req.query.pdb+'?cutoff=high');
+        }
+        if(req.query.pdb2 && req.query.pdb2.length == 4 ){
+            res.redirect('/'+req.query.pdb2+'?cutoff=high');
+        }
         res.render(
             "overview",
             {

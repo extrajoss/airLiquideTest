@@ -14,12 +14,16 @@
   "dependencies": {
     "ejs": "latest",
     "express": "latest",
-    "request": "latest",
+    "express-session": "^1.15.2",
     "forever": "latest",
-    "mkdirp": "latest",
     "fs-extra": "latest",
-    "object-sizeof":"latest",
-    "numeral":"latest"
+    "googleapis": "^19.0.0",
+    "mkdirp": "latest",
+    "numeral": "latest",
+    "object-sizeof": "latest",
+    "passport": "^0.3.2",
+    "passport-local": "^1.0.0",
+    "request": "latest"
   },
   "devDependencies": {
     "babel-cli": "^6.24.1",

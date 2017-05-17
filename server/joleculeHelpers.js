@@ -111,7 +111,7 @@ var joleculeHelpers = function(pdb,energyCutoffSet){
         var sharedFilePath = mapFileSharedPath(nobleGas);
         var localFilePath = mapFileLocalPath(nobleGas);  
         return ensureFileWithRemoteFile(localFilePath,remoteFilePath,sharedFilePath)
-            .catch(function(err){throw("Failed to find " + nobleGas + " Map File due to the following error: " + err)});
+            .catch(function(err){throw("There are no available map files for the PDB '"+pdb+"'<br/>If you wish to view the PDB on jolecule please click <a href='http://jolecule.appspot.com/pdb/"+pdb+"#view:000000'>here</a>")});
     };
 
     var getPdbFile = function (){
