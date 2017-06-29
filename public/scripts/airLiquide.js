@@ -102,13 +102,13 @@ var showData = function(){
     addClass(document.getElementById("dataNav"),"active");
     removeClass(document.getElementById("aboutNav"),"active");
     document.getElementById('about').style.display = 'none';
-    document.getElementById('data').style.display = 'block';
+    document.getElementById('data').style.display = 'flex';
 };
 var showAbout = function(){
     addClass(document.getElementById("aboutNav"),"active");
     removeClass(document.getElementById("dataNav"),"active");
     document.getElementById('data').style.display = 'none';
-    document.getElementById('about').style.display = 'block';
+    document.getElementById('about').style.display = 'flex';
 }
 var hasClass = function(el, className) {
   if (el.classList)

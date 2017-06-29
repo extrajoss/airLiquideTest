@@ -166,7 +166,7 @@ div.panel h3.sub {
 	color: #444;
 	border-bottom: 0px none;
 	display: inline-block;
-	margin: 6px 3px 3px 3px;
+	margin: 3px 0px 0px 0px;
 	/*width: 47%;*/
 	vertical-align: top;
 }
@@ -373,11 +373,6 @@ a, p#psyns a, p#osyns a, .simulatelink { color: #08C; text-decoration: none; }
 .fakelink:hover, a:hover, p#psyns a:hover, span.explanation a:hover, p#osyns a:hover { text-decoration: underline; }
 
 span.explanation a { color: #6df; text-decoration: none; }
-
-h4.sub {
-	color: #666;
-	margin: 1.3em 0 0.3em 0;
-}
 
 /*** resizable 3D view ***/
 
