@@ -5,12 +5,14 @@ module.exports = {
 
 var joleculeHelpers = function(pdb,energyCutoffSet){
 
-    var config = require('../config');
-    var childProcess = require("child_process");
-    var path = require('path');
-    var fs = require('fs-extra');
-    var request = require('request');
+    const config = require('../config');
+    const childProcess = require("child_process");
+    const path = require('path');
+    const fs = require('fs-extra');
+    const request = require('request');
     const zlib = require('zlib');
+    const numeral = require('numeral');
+    
     var exports = {}; 
 
     const SPACIAL_CUTOFF = config.jolecule.SPACIAL_CUTOFF;
@@ -21,14 +23,29 @@ var joleculeHelpers = function(pdb,energyCutoffSet){
     const JOL_STATIC_SCRIPT =config.jolecule.JOL_STATIC_SCRIPT;
     const NOBLE_GAS_SYMBOLS = config.jolecule.NOBLE_GAS_SYMBOLS;
     const ENERGY_CUTOFF_SETS = config.jolecule.ENERGY_CUTOFF_SETS;
+    const MAX_ENERGY_CUTOFF = config.jolecule.MAX_ENERGY_CUTOFF;
+    const MIN_ENERGY_CUTOFF = config.jolecule.MIN_ENERGY_CUTOFF;
     const DATA_SERVER_FILE_NUMBERS = [0,1,2,3,4,5];
 
     pdb = pdb.toLowerCase();
     exports.pdb = pdb;
-    exports.energyCutoffSet = energyCutoffSet;
     exports.ENERGY_CUTOFF_SETS = ENERGY_CUTOFF_SETS;
+    exports.isDefaultEnergyCutoffSet = Object.keys(ENERGY_CUTOFF_SETS).indexOf(energyCutoffSet)>=0;
+    exports.isNumericEnergyCutoffSet = numeral(energyCutoffSet)&&parseFloat(energyCutoffSet)<=MAX_ENERGY_CUTOFF&&parseFloat(energyCutoffSet)>=MIN_ENERGY_CUTOFF;
+    exports.isEnergyCutoffSet = function(){return exports.isDefaultEnergyCutoffSet||exports.isNumericEnergyCutoffSet;};
+    if(exports.isNumericEnergyCutoffSet){
+        energyCutoffSet = numeral(energyCutoffSet).format('0.0');
+    }
+    exports.energyCutoffSet = energyCutoffSet;
 
-    var energyCutoffs = ENERGY_CUTOFF_SETS[energyCutoffSet];
+    var energyCutoffs;
+    if(exports.isDefaultEnergyCutoffSet ){
+        energyCutoffs = ENERGY_CUTOFF_SETS[energyCutoffSet];
+    }else if (exports.isNumericEnergyCutoffSet){
+        energyCutoffs = [energyCutoffSet,energyCutoffSet,energyCutoffSet,energyCutoffSet,energyCutoffSet];
+    }else{
+        throw("'"+energyCutoffSet+"' is not a valid energyCutoffSet (value must be between "+MAX_ENERGY_CUTOFF+" and "+MIN_ENERGY_CUTOFF+"). ");
+    }
 
     var baseLocalPath =function(){ return  `${config.web.baseStatic}/data/${pdb}`;}
 
@@ -51,7 +68,7 @@ var joleculeHelpers = function(pdb,energyCutoffSet){
     var dataServerLocalPathClient =function(){ return  `/data/${pdb}/dataServers/${energyCutoffSet}`;}
     var dataServerLocalPath =function(){ return  `${config.web.baseStatic}/data/${pdb}/dataServers/${energyCutoffSet}`;}
     var dataServerFileLocalPath =function(i){ return  `${config.web.baseStatic}/data/${pdb}/dataServers/${energyCutoffSet}/data-server${i}.js`;}
-    var dataServerRoute =function(){ return  `/data/${energyCutoffSet}/${pdb}`;}
+    var dataServerRoute =function(){ return  `/data/${pdb}/${energyCutoffSet}`;}
     
 
     exports.paths = {
@@ -94,7 +111,7 @@ var joleculeHelpers = function(pdb,energyCutoffSet){
         var sharedFilePath = mapFileSharedPath(nobleGas);
         var localFilePath = mapFileLocalPath(nobleGas);  
         return ensureFileWithRemoteFile(localFilePath,remoteFilePath,sharedFilePath)
-            .catch(function(err){throw("Failed to find " + nobleGas + " Map File due to the following error: " + err)});
+            .catch(function(err){throw("There are no available map files for the PDB '"+pdb+"'<br/>If you wish to view the PDB on jolecule please click <a href='http://jolecule.appspot.com/pdb/"+pdb+"#view:000000'>here</a>")});
     };
 
     var getPdbFile = function (){
@@ -291,7 +308,11 @@ var joleculeHelpers = function(pdb,energyCutoffSet){
         });
 
     };
-    
+
+    var isPdb = function(){
+        return pdb.match(/^\w{4}$/)?true:false;
+    };
+    exports.isPdb = isPdb;
     return exports;
     
 }

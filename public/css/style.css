@@ -1,9 +1,199 @@
 body {
-    margin: 0;
-    overflow: hidden;
-    width: 100%;
-    height: 100%;
+  background-color: #eee;
 }
+.container{
+  margin:2%;
+}
+div.panel{
+    padding:0px 10px 0px 10px;
+}
+div.panel h3{
+    margin:1px -9px 1px -9px;
+}
+.form-signin {
+  max-width: 330px;
+  padding: 15px;
+  margin: 0 auto;
+}
+.form-signin .form-signin-heading,
+.form-signin .checkbox {
+  margin-bottom: 10px;
+}
+.form-signin .checkbox {
+  font-weight: normal;
+}
+.form-signin .btn{
+    background-color: #999;
+}
+.form-signin .form-control {
+  position: relative;
+  height: auto;
+  -webkit-box-sizing: border-box;
+     -moz-box-sizing: border-box;
+          box-sizing: border-box;
+  padding: 10px;
+  font-size: 16px;
+}
+.form-signin .form-control:focus {
+  z-index: 2;
+}
+.form-signin input[type="email"] {
+  margin-bottom: -1px;
+  border-bottom-right-radius: 0;
+  border-bottom-left-radius: 0;
+}
+.form-signin input[type="password"] {
+  margin-bottom: 10px;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+.header{
+    display:flex;
+}
+.header-title{
+    flex:3;
+}
+.header-nav{
+    flex:1;
+    display:flex;
+    flex-flow:column;
+}
+.pdb-panel{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.body-content{
+    display:flex;
+    flex-flow:row;
+}
+.body-main{
+    flex:3;
+}
+.body-side{
+    flex:1;
+    display:flex;
+    flex-direction: column;
+    align-content: Space-between;
+}
+#jolecule_image{
+    height:400;
+    width:600;
+}
+q{
+    font-style: italic;
+    font-size:0.8em;
+}
+span.quote_source{
+        font-size:0.8em;
+}
+#pdbNav{
+    margin-top:1em;
+}
+body{
+       background-color:#ababab;
+}
+div.content{
+    margin:5%;
+}
+div.date_published{
+    text-align:right;
+    margin-right:5%;
+    margin-top: auto;
+    color:#999;
+}
+div.tabBg.panel { 
+	background:#CCC url(/assets/images/tabBG.png) repeat-x; 
+/* 	height: 900px; */
+}
+.atomicNumber{
+font-size: 0.7em;
+text-align: left;
+}
+.atomicWeight{
+font-size: 0.5em;
+}
+.elementName{
+font-size: 0.6em;
+}
+.elementSymbol{
+font-size: 2em;
+}
+
+.pageNav {
+    margin-top:auto;
+    text-align:right;
+    margin-right:5%;
+}
+.pageNav a{
+    color:#999;
+}
+.pageNav .active{
+    text-decoration: underline;
+}
+.googleSpreadSheetMap{
+    text-align: center;
+    margin: 0.5em;
+    border-spacing: 0px;
+    border-collapse:collapse;
+}
+#cutoffTable{
+    font-size: 1em;
+    text-align: center;
+    margin-left:auto;
+}
+#cutoffTable td, #cutoffTable th{
+    text-align: center;
+        padding:0.2em;
+}
+#cutoffTable td{
+    border-top:solid 0.1em #333;
+}
+.googleSpreadSheetMap tbody{
+    border:solid 0.2em #333333;
+}
+.googleSpreadSheetMap theader{
+    background-color:#eee;
+}
+.googleSpreadSheetMap th{
+        font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif; 
+    font-weight: 300;
+    text-align: center;
+    border:solid 0.2em #333333;
+    padding: 0.5em;
+    font-style: bold;
+    color: #333333;;
+}
+.googleSpreadSheetMap td{
+    filter: brightness(1);
+    text-align: center;
+    border:solid 0.15em #666666;
+    padding: 0.5em;
+}
+td.selectedSpreadsheet{
+    filter:brightness(1.3);
+    border:solid 0.15em #444;
+}
+th.element{
+    width:5em;
+    color: #333;
+}
+tr.element-He td,tr.element-He th{
+    background-color: #9ed2e4; 
+}
+tr.element-Ne td,tr.element-Ne th{
+    background-color: #f79f7c;
+}
+tr.element-Ar td,tr.element-Ar th{
+    background-color: #7b86c2;
+}
+tr.element-Kr td,tr.element-Kr th{
+    background-color: #acd376;
+}
+tr.element-Xe td,tr.element-Xe th{
+    background-color: #5DC4BE;
+}
+
 #tempLoading {
     background-color: #000;
     width: 100%;
@@ -21,8 +211,57 @@ body {
     height: 20px;
     animation: spin 2s linear infinite;
 }
-
+#contact-table{
+    text-align: left;
+    font-size: 1em;
+}
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
+}
+@media screen and (max-width: 480px) {
+	table.googleSpreadSheetMap {
+		overflow-x: auto;
+		display: block;
+	}
+    #pdbNav{
+         display:none;
+    }
+    #pdbPanel{
+         display:block;
+    }
+}
+@media screen and (max-width: 768px) {
+    #pdbExamples{
+        display:none;
+    }
+    .body-content{
+        display:flex;
+        flex-flow:column;
+}
+.body-main{
+    flex:none;
+}
+.body-side{
+    flex:none;
+}
+	#quote {
+		display: none;
+	}
+}
+@media screen and (max-width: 640px) {
+     #jolecule_image{
+    height:200;
+    width:300;
+    }
+}
+@media screen and (min-width: 480px) {
+        #pdbNav{
+         display: flex;
+         flex-direction: column;
+         align-items: flex-end;
+    }
+        #pdbPanel{
+         display:none;
+    }
 }

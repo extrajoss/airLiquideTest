@@ -5,3 +5,5 @@ dataServers/
 node_modules/
 .DS_Store
 .gitignore
+log/
+npm-debug.log*

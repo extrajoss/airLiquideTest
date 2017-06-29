@@ -1,4 +1,4 @@
-var loadingText = '<div style="display: inline-block">Checking file requirements.<br/>This may takes several minutes.</div> <div class="loader" style="display: inline-block"></div>';
+var loadingText = '<div style="display: inline-block">Checking file requirements.<br/>This may take several minutes.</div> <div class="loader" style="display: inline-block"></div>';
 var loadingDiv = $("<div></div>").attr('id', 'temploading-message').css({
     'z-index': 5000,
     'background-color': 'rgba(60, 60, 60, 0.75)',
@@ -30,7 +30,7 @@ var openMap = function (pdb,energyCutoffSet){
     }
     $('#temploading-message').html(loadingText).resize();         
     $.getJSON({
-        url: "/getMaps/"+energyCutoffSet+"/"+pdb+"/",
+        url: "/getMaps/"+pdb+"/"+energyCutoffSet+"/",
         success: displayJolecule
     })
     .fail(function(err) {
@@ -51,8 +51,12 @@ var displayJolecule = function(res) {
     }
     console.log("displayJolecule",res);
     var pdb = res.pdb;
-    var energyCutoffSet = res.energyCutoffSet;  
+    var cutoff = res.cutoff;  
     var dataServerRoute = res.dataServerRoute
+    if (history.replaceState) {
+        var newurl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?cutoff='+cutoff;
+        window.history.replaceState({path:newurl},'',newurl);
+    }
     $("#jolecule").show();  
     $("#tempLoading").hide();          
     require( 
@@ -73,3 +77,57 @@ var displayJolecule = function(res) {
         });
     });     
 };
+var selectGoogleSpreadsheet = function(el,link){
+    removeClass(document.querySelector(".selectedSpreadsheet"),"selectedSpreadsheet");
+    addClass(el,"selectedSpreadsheet");
+    showGoogleSpreadsheet(link);
+};
+var showGoogleSpreadsheet= function(link){
+    document.getElementById('googleSpreadSheet').src = link;
+    setTimeout(showSpreadsheetTab,500);
+};
+var showSpreadsheetTab= function(){
+    addClass(document.getElementById("dataSetsTab"),"inactive");
+    removeClass(document.getElementById("spreadsheetTab"),"inactive");
+    document.getElementById('googleSpreadSheet').style.display = 'block';
+    document.getElementById('googleSpreadSheetMap').style.display = 'none';
+};
+var showDataSetsTab= function(){
+    addClass(document.getElementById("spreadsheetTab"),"inactive");
+    removeClass(document.getElementById("dataSetsTab"),"inactive");
+    document.getElementById('googleSpreadSheet').style.display = 'none';
+    document.getElementById('googleSpreadSheetMap').style.display = 'block';
+};
+var showData = function(){
+    addClass(document.getElementById("dataNav"),"active");
+    removeClass(document.getElementById("aboutNav"),"active");
+    document.getElementById('about').style.display = 'none';
+    document.getElementById('data').style.display = 'flex';
+};
+var showAbout = function(){
+    addClass(document.getElementById("aboutNav"),"active");
+    removeClass(document.getElementById("dataNav"),"active");
+    document.getElementById('data').style.display = 'none';
+    document.getElementById('about').style.display = 'flex';
+}
+var hasClass = function(el, className) {
+  if (el.classList)
+    return el.classList.contains(className)
+  else
+    return !!el.className.match(new RegExp('(\\s|^)' + className + '(\\s|$)'))
+}
+
+var addClass = function (el, className) {
+  if (el.classList)
+    el.classList.add(className)
+  else if (!hasClass(el, className)) el.className += " " + className
+}
+
+removeClass = function (el, className) {
+  if (el.classList)
+    el.classList.remove(className)
+  else if (hasClass(el, className)) {
+    var reg = new RegExp('(\\s|^)' + className + '(\\s|$)')
+    el.className=el.className.replace(reg, ' ')
+  }
+}

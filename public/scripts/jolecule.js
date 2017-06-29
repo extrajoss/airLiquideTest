@@ -71958,7 +71958,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var darkRed = new _three2.default.Color(0x662222);
 	
 	var ElementColors = {
-	  "H": 0xCCCCCC,
+"H": 0xCCCCCC,
 	  "C": 0xAAAAAA,
 	  "O": 0xCC0000,
 	  "N": 0x0000CC,
@@ -71970,11 +71970,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	  "I": 0x6600AA,
 	  "FE": 0xCC6600,
 	  "CA": 0x8888AA,
-	  "He": 0x7B86C2,
-	  "Ne": 0x9ED2E4,
-	  "Ar": 0x5DC4BE,
+	  "He": 0x9ED2E4,
+	  "Ne": 0xF79F7C,
+	  "Ar": 0x7B86C2,
 	  "Kr": 0xACD376,
-	  "Xe": 0xF79F7C,
+	  "Xe": 0x5DC4BE,
 	  "Rn": 0xE29EC5
 	};
 	
