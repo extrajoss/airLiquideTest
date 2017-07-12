@@ -60,23 +60,24 @@ var displayJolecule = function(res) {
     $("#jolecule").show();  
     $("#tempLoading").hide();          
     require( 
-            ['/scripts/jolecule.js', 
+            ['/scripts/jolecule2.js', 
             dataServerRoute+"/0/", 
             dataServerRoute+"/1/", 
             dataServerRoute+"/2/", 
             dataServerRoute+"/3/",  
             dataServerRoute+"/4/",  
             dataServerRoute+"/5/"], 
-            function(jolecule, dataServer0, dataServer1, dataServer2, dataServer3, dataServer4, dataServer5) {  
-                console.log({"dataServer0":dataServer0, "dataServer1":dataServer1, "dataServer2":dataServer2, "dataServer3":dataServer3, "dataServer4":dataServer4, "dataServer5":dataServer5});                
-        jolecule.initEmbedJolecule({
-            div_tag: '#jolecule',
-            data_servers: [dataServer0, dataServer1, dataServer2, dataServer3, dataServer4, dataServer5],
-            isGrid: true,
-            loading_html:"<div class='loader'>Loading....</div>",
-        });
-    });     
-};
+            function(jolecule, dataServer0, dataServer1, dataServer2, dataServer3, dataServer4, dataServer5) {                  
+                j = jolecule.initEmbedJolecule({
+                    div_tag: '#jolecule',
+                    isGrid: true,
+                    loading_html:"<div class='loader'>Loading....</div>",
+                });
+                for (var dataServer of [dataServer0, dataServer1, dataServer2, dataServer3, dataServer4, dataServer5]) {
+                    j.addDataServer(dataServer);
+                };
+            });     
+    };
 var selectGoogleSpreadsheet = function(el,link){
     removeClass(document.querySelector(".selectedSpreadsheet"),"selectedSpreadsheet");
     addClass(el,"selectedSpreadsheet");

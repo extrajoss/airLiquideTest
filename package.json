@@ -14,6 +14,7 @@
   "dependencies": {
     "body-parser": "latest",
     "cookie-parser": "latest",
+    "crypto": "0.0.3",
     "ejs": "latest",
     "express": "latest",
     "express-session": "^1.15.2",
@@ -25,7 +26,8 @@
     "object-sizeof": "latest",
     "passport": "^0.3.2",
     "passport-local": "^1.0.0",
-    "request": "latest"
+    "request": "latest",
+    "sqlite3": "^3.1.8"
   },
   "devDependencies": {
     "babel-cli": "^6.24.1",
