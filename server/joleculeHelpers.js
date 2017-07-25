@@ -145,7 +145,7 @@ var joleculeHelpers = function(pdb,energyCutoffSet){
         var localFilePath = pdbFileLocalPath();
         return ensureFileWithRemoteFile(localStructureFilePath,remoteFilePath)
             .then(function(){decompressGzFile(localStructureFilePath,localFilePath)})
-            .catch(function(err){throw("Failed to find "+ pdb +" PDB File due to the following error: " + err)});
+            .catch(function(err){throw("Failed to find "+ pdb +" PDB File due to the following error: " + err+ " click <a href='/flushcache/"+pdb+"/"+energyCutoff+"'>here to retry</a>")});
     };
 
     var decompressGzFile = function(inputFile,outputFile){
@@ -274,7 +274,7 @@ var joleculeHelpers = function(pdb,energyCutoffSet){
         var processedPDBFiles = getProcessedPDBFiles();
         return Promise
             .all(processedPDBFiles)
-            .catch(function(err){throw("Failed to PreProcess map files due to the following error: " + err)});
+            .catch(function(err){throw("Failed to PreProcess map files due to the following error: " + err+ " click <a href='/flushcache/"+pdb+"/"+energyCutoff+"'>here to retry</a>")});
     }
 
     var runJoleculePreProcessing = function(nobleGas,energyCutoff){
@@ -299,7 +299,7 @@ var joleculeHelpers = function(pdb,energyCutoffSet){
                         throw("Static script succeeded but Static Files not generated");
                     }
                 })
-                .catch(function(err){throw("Failed to Build Jolecule Data_Server due to the following error: " + err)});
+                .catch(function(err){throw("Failed to Build Jolecule Data_Server due to the following error: " + err + " click <a href='/flushcache/"+pdb+"/"+energyCutoff+"'>here to retry</a>")});
         }
     };
 

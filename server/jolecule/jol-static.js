@@ -191,7 +191,7 @@ if (remain.length < 1) {
       {pdbId, pdbLines, viewsJsonStr});
     fs.writeFileSync(dataJs, dataJsText);
   }
-
+/*
   let html = path.join(targetDir, 'index.html');
   let title = "jolecule";
   let isFullPage = true;
@@ -229,6 +229,7 @@ if (remain.length < 1) {
   if (!parsed.batch) {
     opener(html);
   }
+  */
 }
 
 

@@ -11,8 +11,7 @@ var flushCache = function(req,res){
     var energyCutoffSet = req.params.energyCutoffSet;
     var cacheId = pdb+"_"+energyCutoffSet;
     delete(dataServersCaches[cacheId]);
-    res.setHeader('Content-Type', 'application/json');
-    res.send(JSON.stringify({"flushedCashId": cacheId}));
+    res.redirect('/'+pdb+'?cutoff='+energyCutoffSet);
 };
 
 var retrieveCache = function(req,res){

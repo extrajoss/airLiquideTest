@@ -29,7 +29,7 @@ app.use(require('express-session')({
 authentication.init(app);
 
 var isAuthenticated = function (req, res, next) {
- //   return next();
+    return next();
   authentication.isAuthenticated(req, res, next);
 }
 
@@ -155,7 +155,7 @@ var srv = app.listen(port, function(){
     console.log('"AirLiquideTest" listening on port: ' + port);
 });
 
-/*
+
 //useful for debugging forked processes
 (function() {
     var childProcess = require("child_process");
@@ -168,4 +168,3 @@ var srv = app.listen(port, function(){
     }
     childProcess.fork = myfork;
 })();
-*/
