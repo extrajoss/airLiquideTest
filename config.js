@@ -1,6 +1,7 @@
 var config = {};
 
 config.jolecule = {};
+config.aquaria = {};
 config.web = {};
 
 config.web.port = process.env.WEB_PORT || 8064;  
@@ -102,5 +103,7 @@ config.jolecule.ENERGY_CUTOFF_SETS = {
 }
 config.jolecule.MAX_ENERGY_CUTOFF = -0.5;
 config.jolecule.MIN_ENERGY_CUTOFF = -2.0;
+
+config.aquaria.UNIPROT_FILE_PATH = "http://aquaria.ws";
 
 module.exports = config;

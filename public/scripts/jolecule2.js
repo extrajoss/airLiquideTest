@@ -339,10 +339,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	              if (protein_data['pdb_text'].length == 0) {
 	                message(_this3.params.loading_failure_html);
-	                return;
-	              }
-	
-	              _this3.protein.load(protein_data);
+	                //return;
+	              }else{
+					  _this3.protein.load(protein_data);
+				  }	              
 	
 	              _this3.protein_display.nDataServer += 1;
 	

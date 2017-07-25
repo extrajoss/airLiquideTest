@@ -7,3 +7,5 @@ node_modules/
 .gitignore
 log/
 npm-debug.log*
+database.sqlite3
+uniprot/

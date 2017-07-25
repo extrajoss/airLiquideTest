@@ -2,7 +2,10 @@ const express = require('express');
 const session = require('express-session') 
 const config = require('./config');
 const ecache  = require('./server/ensureProcessingCache.js');
+const joleculeHelpers  = require('./server/joleculeHelpers.js');
 const authentication = require('./server/authentication.js');
+const csv_parse = require('fast-csv');
+
 /*
 const users = [{  
   username: 'AirLiquide',
@@ -26,6 +29,7 @@ app.use(require('express-session')({
 authentication.init(app);
 
 var isAuthenticated = function (req, res, next) {
+ //   return next();
   authentication.isAuthenticated(req, res, next);
 }
 
@@ -62,7 +66,8 @@ app.get('/',isAuthenticated,
             "overview",
             {
                 proteinListGoogleSpreadsheet:config.web.proteinListGoogleSpreadsheet,
-                baseWebsite:config.web.baseWebsite
+                baseWebsite:config.web.baseWebsite,
+                defaultPDB:req.query.pdb
             }
         ); 
     }
@@ -80,6 +85,41 @@ app.get(
         ); 
     }
 );
+
+app.get(
+    '/getUniprot/:uniprot',isAuthenticated,
+    function(req, res, next){               
+        var jol = joleculeHelpers.set('1be9','-0.5'); 
+        var clusters = [];
+        var clusterChecks = [];
+        var parseCSV = function(fileName){
+            return new Promise(function(resolve,reject){
+                csv_parse
+                    .fromPath(fileName,{headers : true})
+                    .on('data', function(data){   
+                        jol = joleculeHelpers.set(data["top pdb"],'-0.5'); 
+                        clusterChecks.push(jol.checkMapFile());              
+                        clusters.push(data);
+                    })
+                    .on('end', function(){
+                        resolve(clusterChecks);
+                    });             
+            });
+        };
+        jol.getUniProtFile(req.params.uniprot)
+            .then(function(fileName){
+                return parseCSV(fileName);
+            }).then(function(clusterChecks){
+                return Promise.all(clusterChecks);
+            }).then(function(results){
+                for (var key in results) {
+                    clusters[key].fileName = results[key];   
+                    console.log(results[key]);  
+                }
+                res.write(JSON.stringify(clusters) );
+                res.end();
+            });
+    });   
 
 app.get(
     '/getMaps/:pdb/:energyCutoffSet/',isAuthenticated,

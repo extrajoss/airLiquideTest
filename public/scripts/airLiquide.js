@@ -21,6 +21,37 @@ var loadingDiv2 = $("<div></div>").attr('id', 'temploading-message').css({
     'left':'100px',
     'position':'absolute',
     'color': '#666' }).html(loadingText).resize();
+
+var checkSearch = function(elementName){
+    var searchTerm = document.getElementById(elementName).value;
+    if(searchTerm.length == 4){
+        return true;
+    }else if(searchTerm.length==6){
+        $.getJSON({
+            url: "/getUniprot/"+searchTerm,
+            success: displayClusters
+        }).fail(function(err) {
+            console.log('Error: ' ,err);
+        })
+        .always(function(err) {
+            console.log("Loaded");
+        });
+        return false;
+    }else{
+        return false;
+    }
+}
+
+var displayClusters = function(res){
+    if(res.ErrorText){
+        console.error(res.ErrorText);                           
+        return;
+    }
+    console.log("displayClusters",res);
+    showClustersTab(res);
+}
+
+
 var openMap = function (pdb,energyCutoffSet){    
     $("#tempLoading").show();
     $("#jolecule").hide();
@@ -89,16 +120,66 @@ var showGoogleSpreadsheet= function(link){
 };
 var showSpreadsheetTab= function(){
     addClass(document.getElementById("dataSetsTab"),"inactive");
+    addClass(document.getElementById("clustersTab"),"inactive");
     removeClass(document.getElementById("spreadsheetTab"),"inactive");
+
     document.getElementById('googleSpreadSheet').style.display = 'block';
+    document.getElementById('clusters').style.display = 'none';
     document.getElementById('googleSpreadSheetMap').style.display = 'none';
 };
 var showDataSetsTab= function(){
     addClass(document.getElementById("spreadsheetTab"),"inactive");
+    addClass(document.getElementById("clustersTab"),"inactive");
     removeClass(document.getElementById("dataSetsTab"),"inactive");
+
     document.getElementById('googleSpreadSheet').style.display = 'none';
+    document.getElementById('clusters').style.display = 'none';
     document.getElementById('googleSpreadSheetMap').style.display = 'block';
 };
+var showClustersTab= function(data){
+    addClass(document.getElementById("spreadsheetTab"),"inactive");
+    addClass(document.getElementById("dataSetsTab"),"inactive");
+    removeClass(document.getElementById("clustersTab"),"inactive");
+    
+    document.getElementById('clusters').style.display = 'block';
+    document.getElementById('googleSpreadSheet').style.display = 'none';
+    document.getElementById('googleSpreadSheetMap').style.display = 'none';
+
+    if(data){
+        document.getElementById('clustersBody').innerHTML = '';
+        for (var row of data) {
+        console.log(row);
+        tableRow = htmlToElement("<tr><td>"+
+        row["cluster index"]+
+        "</td><td>"+
+        row["cluster size"]+
+        "</td><td>"+
+        clusterLink(row)+
+        "</td><td>"+
+        row["top pdb chain"]+
+        "</td><td>"+
+        row["alignment score"]+
+        "</td></tr>");
+        document.getElementById('clustersBody').appendChild(tableRow);
+    };
+    }
+    
+
+};
+var clusterLink = function(row){
+    if(row["fileName"]){
+            return "<a href ='"+ row["top pdb"] + "'>"+row["top pdb"]+"</a>";
+        }  else{
+            return row["top pdb"];
+        }  
+}
+
+function htmlToElement(html) {
+    var template = document.createElement('template');
+    template.innerHTML = html;
+    return template.content.firstChild;
+}
+
 var showData = function(){
     addClass(document.getElementById("dataNav"),"active");
     removeClass(document.getElementById("aboutNav"),"active");
