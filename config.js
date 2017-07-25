@@ -91,8 +91,8 @@ config.jolecule.SPACIAL_CUTOFF = 2;
 config.jolecule.MAP_FILE_PATH = "http://hpc.csiro.au/users/272675/airliquide/mapfiles";
 //config.jolecule.MAP_SHARED_FILE_PATH = "//OSM/CBR/MFG_AIRLIQUIDE/work/web/mapfiles";
 config.jolecule.PDB_FILE_PATH = "http://files.rcsb.org/pub/pdb/data/structures/divided/pdb";
-config.jolecule.PREPROCESSING_SCRIPT = __dirname + '/resources/jolecule/autodock2pdbES5.js';
-config.jolecule.JOL_STATIC_SCRIPT ='resources/jolecule/jol-static.js';
+config.jolecule.PREPROCESSING_SCRIPT = __dirname + '/server/jolecule/autodock2pdbES5.js';
+config.jolecule.JOL_STATIC_SCRIPT ='server/jolecule/jol-static.js';
 config.jolecule.NOBLE_GAS_SYMBOLS = 
                     ["He","Ne","Ar","Kr","Xe"];
 config.jolecule.ENERGY_CUTOFF_SETS = {        
