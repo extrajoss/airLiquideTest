@@ -149,6 +149,32 @@ font-size: 2em;
 #cutoffTable td{
     border-top:solid 0.1em #333;
 }
+.clusters{
+    text-align: center;
+    margin: 0.5em;
+    border-spacing: 0px;
+    border-collapse:collapse;
+}
+
+.clusters tbody{
+    border:solid 0.2em #333333;
+}
+
+.clusters th{
+    font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif; 
+    font-weight: 300;
+    text-align: center;
+    border:solid 0.2em #333333;
+    padding: 0.5em;
+    font-style: bold;
+    color: #333333;;
+}
+.clusters td{
+    text-align: center;
+    border:solid 0.15em #666666;
+    padding: 0.5em;
+}
+
 .googleSpreadSheetMap tbody{
     border:solid 0.2em #333333;
 }
