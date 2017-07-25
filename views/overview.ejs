@@ -24,8 +24,8 @@
       </div>
 
       <div class="header-nav">
-        <form id="pdbNav" name="pdbNav" class="" onsubmit="return (document.getElementById('pdb').value.length == 4);">
-          <input type="text" id="pdb" name="pdb" class="form-control" placeholder="PDB Id." size="8" maxlength="4" />
+        <form id="pdbNav" name="pdbNav" class="" onsubmit="return checkSearch('pdb');">
+          <input type="text" id="pdb" name="pdb" class="form-control" placeholder="PDB or Uniprot Id" size="6" maxlength="6" value="<%=defaultPDB%>"/>
           <span id="pdbExamples">Examples: <a href="<%=baseWebsite%>/2bmm?cutoff=high">2bmm</a> or <a href="<%=baseWebsite%>/1be9?cutoff=high">1be9</a></span>
         </form>
         <div class="pageNav">
@@ -35,8 +35,8 @@
       </div>
     </div>
     <div id="pdbPanel" name="pdbPanel" class="panel">
-      <form class="pdb-panel" onsubmit="return (document.getElementById('pdb2').value.length == 4);">
-        <input type="text" id="pdb2" name="pdb2" class="form-control" placeholder="PDB Id." size="8" maxlength="4" />
+      <form class="pdb-panel" onsubmit="return checkSearch('pdb2');">
+                 <input type="text" id="pdb2" name="pdb2" class="form-control" placeholder="PDB or Uniprot Id" size="6" maxlength="6" value="<%=defaultPDB%>"/>
         <span>Examples: <a href="<%=baseWebsite%>/2bmm?cutoff=high">2bmm</a> or <a href="<%=baseWebsite%>/1be9?cutoff=high">1be9</a></span>
       </form>
     </div>
@@ -44,8 +44,22 @@
       <div class="tabBg panel body-main ">
         <h3 id="dataSetsTab" name="dataSetsTab" class="sub" onclick="showDataSetsTab();">Datasets</h3>
         <h3 id="spreadsheetTab" name="spreadsheetTab" class="sub inactive" onclick="showSpreadsheetTab();">Spreadsheet</h3>
+        <h3 id="clustersTab" name="clustersTab" class="sub inactive" onclick="showClustersTab();">Clusters</h3>
         <iframe id="googleSpreadSheet" name="googleSpreadSheet" frameborder="0" scrolling="" src="https://docs.google.com/spreadsheets/d/1DjmSc7hcU_NUspzmpL5na9xlCoTMZRj6F8HrE_luOvI/edit#gid=448796123"
           style="display:none;width: 100%; height: 700px;"></iframe>
+          <table id="clusters" name="clusters" class="clusters">
+            <thead>
+            <tr>
+              <th>cluster index</th>
+              <th>cluster size</th>
+              <th>top pdb</th>
+              <th>top pdb chain</th>
+              <th>alignment score</th>
+            </tr>
+          </thead>
+          <tbody id="clustersBody" name="clustersBody">
+            </tbody>
+          </table>
         <table id="googleSpreadSheetMap" name="googleSpreadSheetMap" class="googleSpreadSheetMap">
           <thead>
             <tr>

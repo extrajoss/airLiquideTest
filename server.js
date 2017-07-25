@@ -2,14 +2,17 @@ const express = require('express');
 const session = require('express-session') 
 const config = require('./config');
 const ecache  = require('./server/ensureProcessingCache.js');
-const passport = require('passport')
-  , LocalStrategy = require('passport-local').Strategy;
+const joleculeHelpers  = require('./server/joleculeHelpers.js');
+const authentication = require('./server/authentication.js');
+const csv_parse = require('fast-csv');
+
+/*
 const users = [{  
   username: 'AirLiquide',
   password: 'AirLiquide',
   id: 1
 }];
-
+*/
 
 var app = express();
 var port = config.web.port;
@@ -22,65 +25,34 @@ app.use(require('express-session')({
   resave: true,
   saveUninitialized: true
 }));
-app.use(passport.initialize());
-app.use(passport.session());
 
+authentication.init(app);
 
 var isAuthenticated = function (req, res, next) {
-  if (req.isAuthenticated())
-    return next();
-  res.redirect('/login');
+ //   return next();
+  authentication.isAuthenticated(req, res, next);
 }
-var getUserByUserName= function(username){
-     for(i=0;i<users.length;i++){
-        if(users[i].username == username){
-            return users[i];
-        }
-    }
-}
-
-var getUserById= function(id){
-     for(i=0;i<users.length;i++){
-        if(users[i].id == id){
-            return users[i];
-        }
-    }
-}
-
-passport.serializeUser(function(user, done) {
-    done(null, user.id);
-});
-
-passport.deserializeUser(function(id, done) {
-    done(null, getUserById(id));
-});
-
-passport.use(new LocalStrategy(
-  function(username, password, done) {
-      var user =getUserByUserName(username); 
-      if (!user) {
-        return done(null, false);
-      }
-      if (user.password != password) {
-        return done(null, false);
-      }
-      return done(null, user);
-  }
-));
-
 
 app.set('view engine','ejs');
 app.get('/favicon.ico', function(req, res,next) {
     res.sendStatus(204);
 });
 app.post('/login',
-  passport.authenticate('local', { successRedirect: '/',
-                                   failureRedirect: '/login',
-                                failureFlash: false})
+    authentication.authenticate()
 );
 app.get('/login',function(req,res,next){
     res.render("login");
 });
+
+app.get('/addUser',isAuthenticated,
+    function(req,res,next){
+        if(req.query.username && req.query.password ){
+            authentication.addUser(req.query.username,req.query.password);
+            res.render("login");
+        }
+        res.status(404).send(err);
+    }
+);
 
 app.get('/',isAuthenticated,
     function(req,res,next){
@@ -94,7 +66,8 @@ app.get('/',isAuthenticated,
             "overview",
             {
                 proteinListGoogleSpreadsheet:config.web.proteinListGoogleSpreadsheet,
-                baseWebsite:config.web.baseWebsite
+                baseWebsite:config.web.baseWebsite,
+                defaultPDB:req.query.pdb
             }
         ); 
     }
@@ -112,6 +85,41 @@ app.get(
         ); 
     }
 );
+
+app.get(
+    '/getUniprot/:uniprot',isAuthenticated,
+    function(req, res, next){               
+        var jol = joleculeHelpers.set('1be9','-0.5'); 
+        var clusters = [];
+        var clusterChecks = [];
+        var parseCSV = function(fileName){
+            return new Promise(function(resolve,reject){
+                csv_parse
+                    .fromPath(fileName,{headers : true})
+                    .on('data', function(data){   
+                        jol = joleculeHelpers.set(data["top pdb"],'-0.5'); 
+                        clusterChecks.push(jol.checkMapFile());              
+                        clusters.push(data);
+                    })
+                    .on('end', function(){
+                        resolve(clusterChecks);
+                    });             
+            });
+        };
+        jol.getUniProtFile(req.params.uniprot)
+            .then(function(fileName){
+                return parseCSV(fileName);
+            }).then(function(clusterChecks){
+                return Promise.all(clusterChecks);
+            }).then(function(results){
+                for (var key in results) {
+                    clusters[key].fileName = results[key];   
+                    console.log(results[key]);  
+                }
+                res.write(JSON.stringify(clusters) );
+                res.end();
+            });
+    });   
 
 app.get(
     '/getMaps/:pdb/:energyCutoffSet/',isAuthenticated,
@@ -147,3 +155,17 @@ var srv = app.listen(port, function(){
     console.log('"AirLiquideTest" listening on port: ' + port);
 });
 
+/*
+//useful for debugging forked processes
+(function() {
+    var childProcess = require("child_process");
+    var oldfork = childProcess.fork;
+    function myfork() {
+        console.log('fork called');
+        console.log(arguments);
+        var result = oldfork.apply(this, arguments);
+        return result;
+    }
+    childProcess.fork = myfork;
+})();
+*/

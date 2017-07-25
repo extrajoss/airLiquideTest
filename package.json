@@ -12,11 +12,16 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "bluebird": "^3.5.0",
     "body-parser": "latest",
     "cookie-parser": "latest",
+    "crypto": "0.0.3",
+    "csv": "^1.1.1",
+    "csv-parse": "^1.2.0",
     "ejs": "latest",
     "express": "latest",
     "express-session": "^1.15.2",
+    "fast-csv": "^2.4.0",
     "forever": "latest",
     "fs-extra": "latest",
     "googleapis": "^19.0.0",
@@ -25,7 +30,8 @@
     "object-sizeof": "latest",
     "passport": "^0.3.2",
     "passport-local": "^1.0.0",
-    "request": "latest"
+    "request": "latest",
+    "sqlite3": "^3.1.8"
   },
   "devDependencies": {
     "babel-cli": "^6.24.1",

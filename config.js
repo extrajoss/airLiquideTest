@@ -1,6 +1,7 @@
 var config = {};
 
 config.jolecule = {};
+config.aquaria = {};
 config.web = {};
 
 config.web.port = process.env.WEB_PORT || 8064;  
@@ -88,7 +89,7 @@ config.web.MAX_CACHE_SIZE = 500000;
 
 config.jolecule.SPACIAL_CUTOFF = 2;
 config.jolecule.MAP_FILE_PATH = "http://hpc.csiro.au/users/272675/airliquide/mapfiles";
-config.jolecule.MAP_SHARED_FILE_PATH = "//OSM/CBR/MFG_AIRLIQUIDE/work/web/mapfiles";
+//config.jolecule.MAP_SHARED_FILE_PATH = "//OSM/CBR/MFG_AIRLIQUIDE/work/web/mapfiles";
 config.jolecule.PDB_FILE_PATH = "http://files.rcsb.org/pub/pdb/data/structures/divided/pdb";
 config.jolecule.PREPROCESSING_SCRIPT = __dirname + '/resources/jolecule/autodock2pdbES5.js';
 config.jolecule.JOL_STATIC_SCRIPT ='resources/jolecule/jol-static.js';
@@ -102,5 +103,7 @@ config.jolecule.ENERGY_CUTOFF_SETS = {
 }
 config.jolecule.MAX_ENERGY_CUTOFF = -0.5;
 config.jolecule.MIN_ENERGY_CUTOFF = -2.0;
+
+config.aquaria.UNIPROT_FILE_PATH = "http://aquaria.ws";
 
 module.exports = config;

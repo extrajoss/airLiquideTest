@@ -19,6 +19,7 @@ var joleculeHelpers = function(pdb,energyCutoffSet){
     const MAP_FILE_PATH = config.jolecule.MAP_FILE_PATH;
     const MAP_SHARED_FILE_PATH = config.jolecule.MAP_SHARED_FILE_PATH;
     const PDB_FILE_PATH = config.jolecule.PDB_FILE_PATH;
+    const UNIPROT_FILE_PATH = config.aquaria.UNIPROT_FILE_PATH;
     const PREPROCESSING_SCRIPT = config.jolecule.PREPROCESSING_SCRIPT;
     const JOL_STATIC_SCRIPT =config.jolecule.JOL_STATIC_SCRIPT;
     const NOBLE_GAS_SYMBOLS = config.jolecule.NOBLE_GAS_SYMBOLS;
@@ -69,6 +70,9 @@ var joleculeHelpers = function(pdb,energyCutoffSet){
     var dataServerLocalPath =function(){ return  `${config.web.baseStatic}/data/${pdb}/dataServers/${energyCutoffSet}`;}
     var dataServerFileLocalPath =function(i){ return  `${config.web.baseStatic}/data/${pdb}/dataServers/${energyCutoffSet}/data-server${i}.js`;}
     var dataServerRoute =function(){ return  `/data/${pdb}/${energyCutoffSet}`;}
+
+    var uniprotFileLocalPath =function(uniprot){ return  `${config.web.baseStatic}/data/uniprot/${uniprot}.csv`;}
+    var uniprotFileRemotePath =function(uniprot){ return  `${UNIPROT_FILE_PATH}/${uniprot}.csv`;}
     
 
     exports.paths = {
@@ -114,6 +118,26 @@ var joleculeHelpers = function(pdb,energyCutoffSet){
             .catch(function(err){throw("There are no available map files for the PDB '"+pdb+"'<br/>If you wish to view the PDB on jolecule please click <a href='http://jolecule.appspot.com/pdb/"+pdb+"#view:000000'>here</a>")});
     };
 
+    var checkMapFile = function() {
+        var sharedFilePath = mapFileSharedPath('He');
+        var localFilePath = mapFileLocalPath('He');  
+        return checkIfFile(sharedFilePath)
+            .then(function(fileName){
+                if(fileName){
+                    return fileName;
+                }else{
+                    return checkIfFile(localFilePath);
+                }
+            });
+    };
+
+    var getUniProtFile = function(uniprot) {
+        var remoteFilePath = uniprotFileRemotePath(uniprot);
+        var localFilePath = uniprotFileLocalPath(uniprot);  
+        return ensureFileWithRemoteFile(localFilePath,remoteFilePath)
+            .catch(function(err){throw("There are no available uniprot files for the code '"+uniprotpdb+"'<br/>")});
+    };
+
     var getPdbFile = function (){
         console.log("Checking for PDB file");
         var remoteFilePath = pdbFileRemotePath();
@@ -133,9 +157,12 @@ var joleculeHelpers = function(pdb,energyCutoffSet){
 
     var getRemoteFile = function(localFilePath,remoteFilePath){
         return new Promise(function(resolve,reject){
+            var localFileDir = path.dirname(localFilePath);
+            console.log(localFilePath +" does not exist creating directory "+localFileDir);
+            ensureDirectorySync(localFileDir);  
             var remoteFileStream = request(remoteFilePath);
             remoteFileStream.pause();
-            remoteFileStream.on('end',resolve);
+            remoteFileStream.on('end',function(){resolve(localFilePath)});
             remoteFileStream.on('error',reject);
             remoteFileStream.on('response', function (resp) {
                 if(resp.statusCode === 200){     
@@ -149,25 +176,65 @@ var joleculeHelpers = function(pdb,energyCutoffSet){
         });
     }
 
-    var ensureFileWithRemoteFile = function (localFilePath,remoteFilePath,sharedFilePath){
-        if (fs.existsSync(sharedFilePath)){
-            return Promise.resolve(sharedFilePath);
-        }else if (fs.existsSync(localFilePath)){
-            return Promise.resolve(localFilePath);
+    var ensureFileWithRemoteFile = function(localFilePath,remoteFilePath,sharedFilePath){
+        return checkIfFile(sharedFilePath)
+            .then(function(fileName){
+                if(fileName){
+                    return fileName;
+                }else{
+                    return checkIfFile(localFilePath);
+                }
+            })
+            .then(function(fileName){
+                if(fileName){
+                    return fileName;
+                }else{
+                    return getRemoteFile(localFilePath,remoteFilePath);                    
+                }
+            })
+            .then(function(fileName){
+                if(fileName){
+                    return fileName;
+                }else{
+                    return checkIfFile(localFilePath);
+                }
+            }).then(function(fileName){
+                if(fileName){
+                    return fileName;
+                }else{
+                    throw("Failed to create "+ localFilePath + " from "+ remoteFilePath);
+                }
+            })
+    }
+
+
+    function checkIfFile(fileName) {
+        if (fileName){
+            return fsStatAsync(fileName);
         }else{
-            var localFileDir = path.dirname(localFilePath);
-            console.log(localFilePath +" does not exist creating directory "+localFileDir);
-            ensureDirectorySync(localFileDir);  
-            return getRemoteFile(localFilePath,remoteFilePath) 
-                    .then(function(){
-                        if (fs.existsSync(localFilePath)){
-                            return localFilePath;
-                        }else{
-                            throw("Failed to create "+ localFilePath + " from "+ remoteFilePath);
+            return Promise.resolve(false);
+        }
+    }
+
+    function fsStatAsync(fileName){
+        return new Promise(function(resolve,reject){
+            fs.stat(fileName, (err, stats) => {
+                    if (err) { 
+                        if (err.code === 'ENOENT') {
+                            resolve( false);
+                        } else {
+                            reject( err);
                         }
-                    });
-        }   
-    };
+                    }else{
+                        if(stats.isFile()){
+                            resolve( fileName);
+                        }else{
+                            reject( false);
+                        }                
+                    }   
+            });
+        });
+    }
 
     var ensureDirectorySync = function (directory) {  
         fs.ensureDirSync(directory);
@@ -290,7 +357,7 @@ var joleculeHelpers = function(pdb,energyCutoffSet){
     var runScript = function (scriptPath,args,options, success, fail) {
         var invoked = false;
         var process = childProcess.fork(scriptPath,args,options);
-        //console.log(scriptPath,args,options);
+        console.log(scriptPath,args,options);
         process.on('error', function (err) {
             if (invoked) return;
             invoked = true;            
@@ -312,6 +379,8 @@ var joleculeHelpers = function(pdb,energyCutoffSet){
     var isPdb = function(){
         return pdb.match(/^\w{4}$/)?true:false;
     };
+    exports.checkMapFile = checkMapFile;
+    exports.getUniProtFile = getUniProtFile;
     exports.isPdb = isPdb;
     return exports;
     
