@@ -29,7 +29,7 @@ app.use(require('express-session')({
 authentication.init(app);
 
 var isAuthenticated = function (req, res, next) {
-   return next();
+  // return next();
   authentication.isAuthenticated(req, res, next);
 }
 
