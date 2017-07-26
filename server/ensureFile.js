@@ -2,6 +2,7 @@
     const fs = require('fs-extra');
     const request = require('request');
     const zlib = require('zlib');
+    const path = require('path');
 
 var runScriptAsync = function (scriptPath,args,options){
         return new Promise(function(resolve,reject){
