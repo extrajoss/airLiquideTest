@@ -16,11 +16,11 @@ var joleculeHelpers = require('./joleculeHelpers.js');
         return ensureFileWithRemoteFile(localFilePath,remoteFilePath)
             .catch(function(err){throw("There are no available uniprot files for the code '"+uniprotpdb+"'<br/>")});
     };
-    var results = {};
-    var clusters = [];
-    var mapFileChecks = [];
 
     var parseCSV = function(fileName){
+        var results = {};
+        var clusters = [];
+        var mapFileChecks = [];
         return new Promise(function(resolve,reject){
             csv_parse
                 .fromPath(fileName,{headers : true})
