@@ -6,12 +6,15 @@ module.exports = {
 var joleculeHelpers = function(pdb,energyCutoffSet){
 
     const config = require('../config');
-    const childProcess = require("child_process");
-    const path = require('path');
+    const ensureFile = require('./ensureFile.js');
     const fs = require('fs-extra');
-    const request = require('request');
-    const zlib = require('zlib');
     const numeral = require('numeral');
+    const path = require('path');
+
+    var runScriptAsync = ensureFile.runScriptAsync;
+    var ensureFileWithRemoteFile = ensureFile.ensureFileWithRemoteFile;
+    var decompressGzFile = ensureFile.decompressGzFile;
+    var checkIfFile = ensureFile.checkIfFile;
     
     var exports = {}; 
 
@@ -19,7 +22,6 @@ var joleculeHelpers = function(pdb,energyCutoffSet){
     const MAP_FILE_PATH = config.jolecule.MAP_FILE_PATH;
     const MAP_SHARED_FILE_PATH = config.jolecule.MAP_SHARED_FILE_PATH;
     const PDB_FILE_PATH = config.jolecule.PDB_FILE_PATH;
-    const UNIPROT_FILE_PATH = config.aquaria.UNIPROT_FILE_PATH;
     const PREPROCESSING_SCRIPT = config.jolecule.PREPROCESSING_SCRIPT;
     const JOL_STATIC_SCRIPT =config.jolecule.JOL_STATIC_SCRIPT;
     const NOBLE_GAS_SYMBOLS = config.jolecule.NOBLE_GAS_SYMBOLS;
@@ -70,9 +72,6 @@ var joleculeHelpers = function(pdb,energyCutoffSet){
     var dataServerLocalPath =function(){ return  `${config.web.baseStatic}/data/${pdb}/dataServers/${energyCutoffSet}`;}
     var dataServerFileLocalPath =function(i){ return  `${config.web.baseStatic}/data/${pdb}/dataServers/${energyCutoffSet}/data-server${i}.js`;}
     var dataServerRoute =function(){ return  `/data/${pdb}/${energyCutoffSet}`;}
-
-    var uniprotFileLocalPath =function(uniprot){ return  `${config.web.baseStatic}/data/uniprot/${uniprot}.csv`;}
-    var uniprotFileRemotePath =function(uniprot){ return  `${UNIPROT_FILE_PATH}/${uniprot}.csv`;}
     
 
     exports.paths = {
@@ -131,13 +130,6 @@ var joleculeHelpers = function(pdb,energyCutoffSet){
             });
     };
 
-    var getUniProtFile = function(uniprot) {
-        var remoteFilePath = uniprotFileRemotePath(uniprot);
-        var localFilePath = uniprotFileLocalPath(uniprot);  
-        return ensureFileWithRemoteFile(localFilePath,remoteFilePath)
-            .catch(function(err){throw("There are no available uniprot files for the code '"+uniprotpdb+"'<br/>")});
-    };
-
     var getPdbFile = function (){
         console.log("Checking for PDB file");
         var remoteFilePath = pdbFileRemotePath();
@@ -146,98 +138,6 @@ var joleculeHelpers = function(pdb,energyCutoffSet){
         return ensureFileWithRemoteFile(localStructureFilePath,remoteFilePath)
             .then(function(){decompressGzFile(localStructureFilePath,localFilePath)})
             .catch(function(err){throw("Failed to find "+ pdb +" PDB File due to the following error: " + err+ " click <a href='/flushcache/"+pdb+"/"+energyCutoff+"'>here to retry</a>")});
-    };
-
-    var decompressGzFile = function(inputFile,outputFile){
-        const gzip = zlib.createGunzip();
-        const inp = fs.createReadStream(inputFile);
-        const out = fs.createWriteStream(outputFile);
-        inp.pipe(gzip).pipe(out);
-    }
-
-    var getRemoteFile = function(localFilePath,remoteFilePath){
-        return new Promise(function(resolve,reject){
-            var localFileDir = path.dirname(localFilePath);
-            console.log(localFilePath +" does not exist creating directory "+localFileDir);
-            ensureDirectorySync(localFileDir);  
-            var remoteFileStream = request(remoteFilePath);
-            remoteFileStream.pause();
-            remoteFileStream.on('end',function(){resolve(localFilePath)});
-            remoteFileStream.on('error',reject);
-            remoteFileStream.on('response', function (resp) {
-                if(resp.statusCode === 200){     
-                    console.log("Generating missing file:" +localFilePath+" from "+remoteFilePath);   
-                    remoteFileStream.pipe(fs.createWriteStream(localFilePath));           
-                    remoteFileStream.resume();
-                }else{ 
-                    reject("Could not retrieve file from "+ remoteFilePath +". Received StatusCode: "+resp.statusCode);
-                }
-            })
-        });
-    }
-
-    var ensureFileWithRemoteFile = function(localFilePath,remoteFilePath,sharedFilePath){
-        return checkIfFile(sharedFilePath)
-            .then(function(fileName){
-                if(fileName){
-                    return fileName;
-                }else{
-                    return checkIfFile(localFilePath);
-                }
-            })
-            .then(function(fileName){
-                if(fileName){
-                    return fileName;
-                }else{
-                    return getRemoteFile(localFilePath,remoteFilePath);                    
-                }
-            })
-            .then(function(fileName){
-                if(fileName){
-                    return fileName;
-                }else{
-                    return checkIfFile(localFilePath);
-                }
-            }).then(function(fileName){
-                if(fileName){
-                    return fileName;
-                }else{
-                    throw("Failed to create "+ localFilePath + " from "+ remoteFilePath);
-                }
-            })
-    }
-
-
-    function checkIfFile(fileName) {
-        if (fileName){
-            return fsStatAsync(fileName);
-        }else{
-            return Promise.resolve(false);
-        }
-    }
-
-    function fsStatAsync(fileName){
-        return new Promise(function(resolve,reject){
-            fs.stat(fileName, (err, stats) => {
-                    if (err) { 
-                        if (err.code === 'ENOENT') {
-                            resolve( false);
-                        } else {
-                            reject( err);
-                        }
-                    }else{
-                        if(stats.isFile()){
-                            resolve( fileName);
-                        }else{
-                            reject( false);
-                        }                
-                    }   
-            });
-        });
-    }
-
-    var ensureDirectorySync = function (directory) {  
-        fs.ensureDirSync(directory);
     };
 
     var getProcessedPDBFiles = function(){
@@ -257,7 +157,7 @@ var joleculeHelpers = function(pdb,energyCutoffSet){
             return Promise.resolve(localFilePath);
         }else{
             var localFileDir = path.dirname(localFilePath);
-            ensureDirectorySync(localFileDir);   
+            fs.ensureDirSync(localFileDir);   
             return runJoleculePreProcessing(args[0],args[1]) 
                 .then(function(){
                     if (fs.existsSync(localFilePath)){
@@ -339,7 +239,7 @@ var joleculeHelpers = function(pdb,energyCutoffSet){
 
     var runJoleculeStatic = function (){
         console.log("Run jol-static");
-        ensureDirectorySync(dataServerLocalPath()); 
+        fs.ensureDirSync(dataServerLocalPath()); 
         var scriptArguments = [];
         scriptArguments.push("-o");
         scriptArguments.push(dataServerLocalPath());
@@ -348,39 +248,10 @@ var joleculeHelpers = function(pdb,energyCutoffSet){
         return  runScriptAsync(JOL_STATIC_SCRIPT,scriptArguments,{cwd:"./"});
     };
 
-    var runScriptAsync = function (scriptPath,args,options){
-        return new Promise(function(resolve,reject){
-            runScript(scriptPath,args,options, resolve,reject);
-        });
-    };
-
-    var runScript = function (scriptPath,args,options, success, fail) {
-        var invoked = false;
-        var process = childProcess.fork(scriptPath,args,options);
-        console.log(scriptPath,args,options);
-        process.on('error', function (err) {
-            if (invoked) return;
-            invoked = true;            
-            fail(err);
-        });
-        process.on('exit', function (code) {
-            if (invoked) return;
-            invoked = true;
-            var err = code === 0 ? null : new Error('exit code ' + code);
-            if(err){                
-                fail(err);
-            }else{
-                success();
-            }
-        });
-
-    };
-
     var isPdb = function(){
         return pdb.match(/^\w{4}$/)?true:false;
     };
     exports.checkMapFile = checkMapFile;
-    exports.getUniProtFile = getUniProtFile;
     exports.isPdb = isPdb;
     return exports;
     

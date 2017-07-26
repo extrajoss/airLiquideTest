@@ -168,7 +168,7 @@ var showClustersTab= function(data){
 };
 var clusterLink = function(row){
     if(row["fileName"]){
-            return "<a href ='"+ row["top pdb"] + "'>"+row["top pdb"]+"</a>";
+            return "<a target='_blank' href ='"+ row["top pdb"] + "'>"+row["top pdb"]+"</a>";
         }  else{
             return row["top pdb"];
         }  
