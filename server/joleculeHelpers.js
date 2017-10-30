@@ -89,10 +89,10 @@ var joleculeHelpers = function(pdb,energyCutoffSet){
         "baseLocalPath":baseLocalPath(),
     };
 
-    exports.ensureJoleculeDataServers = function(){
-            return ensureLocalFiles()
-            .then(ensurePreProcessingFiles)
-            .then(ensureJoleculeStatic);
+    exports.ensureJoleculeDataServers = async function(){
+            await ensureLocalFiles()
+            await ensurePreProcessingFiles();
+            return ensureJoleculeStatic();
     };
 
     var ensureLocalFiles = function(){
@@ -117,27 +117,29 @@ var joleculeHelpers = function(pdb,energyCutoffSet){
             .catch(function(err){throw("There are no available map files for the PDB '"+pdb+"'<br/>If you wish to view the PDB on jolecule please click <a href='http://jolecule.appspot.com/pdb/"+pdb+"#view:000000'>here</a>")});
     };
 
-    var checkMapFile = function() {
+    var checkMapFile = async function() {
         var sharedFilePath = mapFileSharedPath('He');
         var localFilePath = mapFileLocalPath('He');  
-        return checkIfFile(sharedFilePath)
-            .then(function(fileName){
-                if(fileName){
-                    return fileName;
-                }else{
-                    return checkIfFile(localFilePath);
-                }
-            });
+        let fileName = checkIfFile(sharedFilePath)
+        if(await fileName){
+            return fileName;
+        }else{
+            return checkIfFile(localFilePath);
+        }
     };
 
-    var getPdbFile = function (){
+    var getPdbFile = async function (){
         console.log("Checking for PDB file");
-        var remoteFilePath = pdbFileRemotePath();
-        var localStructureFilePath = pdbStructureFileLocalPath()
-        var localFilePath = pdbFileLocalPath();
-        return ensureFileWithRemoteFile(localStructureFilePath,remoteFilePath)
-            .then(function(){decompressGzFile(localStructureFilePath,localFilePath)})
-            .catch(function(err){throw("Failed to find "+ pdb +" PDB File due to the following error: " + err+ " click <a href='/flushcache/"+pdb+"/"+energyCutoffSet+"'>here to retry</a>")});
+        let remoteFilePath = pdbFileRemotePath();
+        let localStructureFilePath = pdbStructureFileLocalPath()
+        let localFilePath = pdbFileLocalPath();
+        try{
+            await ensureFileWithRemoteFile(localStructureFilePath,remoteFilePath);
+            decompressGzFile(localStructureFilePath,localFilePath);
+        }
+        catch(err){
+            throw("Failed to find "+ pdb +" PDB File due to the following error: " + err+ " click <a href='/flushcache/"+pdb+"/"+energyCutoffSet+"'>here to retry</a>")
+        }
     };
 
     var getProcessedPDBFiles = function(){
@@ -152,21 +154,19 @@ var joleculeHelpers = function(pdb,energyCutoffSet){
         return ensureFileWithPreProcessingScript(localFilePath,args)
     };
 
-    var ensureFileWithPreProcessingScript = function (localFilePath,args){        
+    var ensureFileWithPreProcessingScript = async function (localFilePath,args){        
         if (fs.existsSync(localFilePath)){
-            return Promise.resolve(localFilePath);
+            return localFilePath;
         }else{
             var localFileDir = path.dirname(localFilePath);
             fs.ensureDirSync(localFileDir);   
-            return runJoleculePreProcessing(args[0],args[1]) 
-                .then(function(){
-                    if (fs.existsSync(localFilePath)){
-                        console.log(localFilePath+" created with cutoff of " + args[1] );
-                        return localFilePath;
-                    }else{
-                        throw("failed to create "+ localFilePath + " with cutoff of " + args[1]);
-                    }
-                });
+            await runJoleculePreProcessing(args[0],args[1]) 
+            if (fs.existsSync(localFilePath)){
+                console.log(localFilePath+" created with cutoff of " + args[1] );
+                return localFilePath;
+            }else{
+                throw("failed to create "+ localFilePath + " with cutoff of " + args[1]);
+            }
         }   
     };
 
@@ -186,20 +186,22 @@ var joleculeHelpers = function(pdb,energyCutoffSet){
         return runScriptAsync(PREPROCESSING_SCRIPT,[ "-e", nobleGas,"-u", energyCutoff,"-s", SPACIAL_CUTOFF,"-o",processedPdbLocalPath()+"/", pdb],{cwd:localPath+'/'});
     };
 
-    var ensureJoleculeStatic = function(){
+    var ensureJoleculeStatic = async function(){
         console.log("Checking for Static files");
         if(checkJoleculeStaticFiles()){
             return getDataServers();
         }else{
-            return runJoleculeStatic()
-                .then(function(){
-                    if(checkJoleculeStaticFiles()){
-                        return getDataServers();
-                    }else{
-                        throw("Static script succeeded but Static Files not generated");
-                    }
-                })
-                .catch(function(err){throw("Failed to Build Jolecule Data_Server due to the following error: " + err + " click <a href='/flushcache/"+pdb+"/"+energyCutoffSet+"'>here to retry</a>")});
+            await runJoleculeStatic();
+            try{
+                if(checkJoleculeStaticFiles()){
+                    return getDataServers();
+                }else{
+                    throw("Static script succeeded but Static Files not generated");
+                }
+            }
+            catch(err){
+                throw("Failed to Build Jolecule Data_Server due to the following error: " + err + " click <a href='/flushcache/"+pdb+"/"+energyCutoffSet+"'>here to retry</a>")
+            };
         }
     };
 

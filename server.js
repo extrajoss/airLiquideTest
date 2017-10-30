@@ -107,23 +107,16 @@ app.get(
 
 app.get(
     '/getUniprot/:uniprot',isAuthenticated,
-    function(req, res, next){               
-        uniprotHelpers.getUniProtFile(req.params.uniprot)
-            .then(function(fileName){
-                return uniprotHelpers.parseCSV(fileName);
-            }).then(function(csvResults){
-                return Promise.all(csvResults.mapFileChecks)
-                    .then(function(fileNames){
-                        csvResults.fileNames = fileNames;
-                        return csvResults
-                    });
-            }).then(function(csvResults){
-                for (var key in csvResults.fileNames) {
-                    csvResults.clusters[key].fileName = csvResults.fileNames[key];   
-                }
-                res.write(JSON.stringify(csvResults.clusters) );
-                res.end();
-            });
+    async function(req, res, next){               
+        let fileName = uniprotHelpers.getUniProtFile(req.params.uniprot);
+        let csvResults = uniprotHelpers.parseCSV(await fileName);
+        let fileNames = Promise.all(csvResults.mapFileChecks)
+        csvResults.fileNames = await fileNames;
+        for (var key in csvResults.fileNames) {
+            csvResults.clusters[key].fileName = csvResults.fileNames[key];   
+        }
+        res.write(JSON.stringify(csvResults.clusters) );
+        res.end();
     });   
 
 app.get(
@@ -139,16 +132,16 @@ app.get(
     });
 app.get(
     '/data/:pdb/:energyCutoffSet/:index/',isAuthenticated,
-    function(req, res, next){     
-        ecache.retrieveCache(req,res)
-            .then(function(dataServer){
-                res.setHeader('content-type', 'text/javascript');
-                res.write(dataServer);
-                res.end();
-            })
-            .catch(function(err){
-                    res.status(404).send(err);
-            });
+    async function(req, res, next){     
+        try{
+            let dataServer = ecache.retrieveCache(req,res);  
+            res.setHeader('content-type', 'text/javascript');
+            res.write(await dataServer);
+            res.end();
+            
+        }catch(err){
+            res.status(404).send(err);
+        }
     });   
 
 app.use(function (req, res, next) {
