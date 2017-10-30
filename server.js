@@ -14,6 +14,13 @@ const users = [{
 }];
 */
 
+const AUTHENTICATION_EXCEPTIONS = [
+    /^\/$/,
+    /^\/(2bmm|1be9)\?cutoff=high$/,
+    /^\/data\/(2bmm|1be9)\/high\/[0-5]\/$/,
+    /^\/getMaps\/(2bmm|1be9)\/high\/$/
+];
+
 var app = express();
 var port = config.web.port;
 var baseStatic = config.web.baseStatic;
@@ -29,8 +36,20 @@ app.use(require('express-session')({
 authentication.init(app);
 
 var isAuthenticated = function (req, res, next) {
-  // return next();
-  authentication.isAuthenticated(req, res, next);
+  if(isExceptedFromAuthentication(req)){
+    return next();
+  } else{
+    authentication.isAuthenticated(req, res, next);   
+  }
+}
+
+var isExceptedFromAuthentication = function(req){
+    let url = req.url;
+    return AUTHENTICATION_EXCEPTIONS.some(
+        (authentication_exception)=>{
+        return authentication_exception.test(url);
+        }
+    );
 }
 
 app.set('view engine','ejs');

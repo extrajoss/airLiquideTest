@@ -31,7 +31,7 @@
     "passport": "^0.3.2",
     "passport-local": "^1.0.0",
     "request": "latest",
-    "sqlite3": "^3.1.8"
+    "sqlite3": "^3.1.13"
   },
   "devDependencies": {
     "babel-cli": "^6.24.1",

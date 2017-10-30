@@ -26,7 +26,7 @@
       <div class="header-nav">
         <form id="pdbNav" name="pdbNav" class="" onsubmit="return checkSearch('pdb');">
           <input type="text" id="pdb" name="pdb" class="form-control" placeholder="PDB or Uniprot Id" size="6" maxlength="6" value="<%=defaultPDB%>"/>
-          <span id="pdbExamples">Examples: <a href="<%=baseWebsite%>/2bmm?cutoff=high">2bmm</a> or <a href="<%=baseWebsite%>/1be9?cutoff=high">1be9</a></span>
+          <span id="pdbExamples">Examples: <a href="/2bmm?cutoff=high">2bmm</a> or <a href="/1be9?cutoff=high">1be9</a></span>
         </form>
         <div class="pageNav">
           <a id="dataNav" name="dataNav" class="active" onclick="showData();">Data</a>&nbsp;|&nbsp;<a id="aboutNav" name="aboutNav"
@@ -37,7 +37,7 @@
     <div id="pdbPanel" name="pdbPanel" class="panel">
       <form class="pdb-panel" onsubmit="return checkSearch('pdb2');">
                  <input type="text" id="pdb2" name="pdb2" class="form-control" placeholder="PDB or Uniprot Id" size="6" maxlength="6" value="<%=defaultPDB%>"/>
-        <span>Examples: <a href="<%=baseWebsite%>/2bmm?cutoff=high">2bmm</a> or <a href="<%=baseWebsite%>/1be9?cutoff=high">1be9</a></span>
+        <span>Examples: <a href="/2bmm?cutoff=high">2bmm</a> or <a href="/1be9?cutoff=high">1be9</a></span>
       </form>
     </div>
     <div id="data" name="data" class="body-content">

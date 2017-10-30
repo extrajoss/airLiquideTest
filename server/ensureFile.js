@@ -12,7 +12,7 @@ var runScriptAsync = function (scriptPath,args,options){
 
 function runScript(scriptPath,args,options, success, fail) {
     var invoked = false;
-    var process = childProcess.fork(scriptPath,args,options);
+    var process = childProcess.spawn(scriptPath,args,options);
     console.log(scriptPath,args,options);
     process.on('error', function (err) {
         if (invoked) return;
