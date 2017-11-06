@@ -57,7 +57,9 @@ app.get('/favicon.ico', function(req, res,next) {
     res.sendStatus(204);
 });
 app.post('/login',
-    authentication.authenticate()
+    function(res,req,next){
+        return authentication.authenticate(res,req,next)(res,req,next);
+    }
 );
 app.get('/login',function(req,res,next){
     res.render("login");

@@ -30,17 +30,22 @@ var init = function(app){
         ')');
         addUser('AirLiquide','AirLiquide');
     });
-    passport.use(new LocalStrategy(function(username, password, done) {
-        db.get('SELECT salt FROM user WHERE username = ?', username, function(err, row) {
-            if (!row) return done(null, false);
-            var hash = hashPassword(password, row.salt);
-            db.get('SELECT username, id FROM user WHERE username = ? AND password = ?', username, hash, function(err, user) {
-            if (!user) return done(null, false);
-            db.run("INSERT INTO login(user_id) VALUES(?)",user.id);
-            return done(null, user);
-            });
-        });
-    }));
+    passport.use(new LocalStrategy(
+        function (username, password, done) {
+            try {
+                db.get('SELECT salt FROM user WHERE username = ?', username, function (err, row) {
+                    if (!row) return done(null, false, { message: 'Incorrect username.' });
+                    var hash = hashPassword(password, row.salt);
+                    db.get('SELECT username, id FROM user WHERE username = ? AND password = ?', username, hash, function (err, user) {
+                        if (!user) return done(null, false, { message: 'Incorrect password.' });
+                        db.run("INSERT INTO login(user_id) VALUES(?)", user.id);
+                        return done(null, user);
+                    });
+                });
+            } catch (err) {
+                return done(err);
+            }
+        }));
 
     passport.serializeUser(function(user, done) {
         return done(null, user.id);
@@ -60,13 +65,21 @@ var isAuthenticated = function (req, res, next) {
     db.run("INSERT INTO request(user_id,url) VALUES(?,?)",user_id,req.url);
     return next();
   }
+  req.session.returnTo = req.url;
   res.redirect('/login');
 }
 
-var authenticate = function(){
-      return passport.authenticate('local', { successRedirect: '/',
-                                   failureRedirect: '/login',
-                                failureFlash: false});
+var authenticate = function (req, res, next) {
+    let returnTo = req.session.returnTo || '/';
+    delete req.session.returnTo;
+    return passport.authenticate(
+        'local',
+        {
+            successRedirect: returnTo,
+            failureRedirect: '/login',
+            failureFlash: false
+        }
+    );
 }
 
 function addUser(username,password){
