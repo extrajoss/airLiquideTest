@@ -12,7 +12,8 @@ var init = function(app){
     db.serialize(function() {
     db.run('CREATE TABLE IF NOT EXISTS "user" ( ' +
         '"id" INTEGER PRIMARY KEY AUTOINCREMENT,' +
-        '"username" TEXT,' +
+        '"fullname" TEXT,' +
+        '"email" TEXT,' +
         '"password" BINARY(32), ' +
         '"salt" BINARY(32),' +
         '"created_on" DATETIME DEFAULT CURRENT_TIMESTAMP ' +
@@ -28,16 +29,21 @@ var init = function(app){
         '"url" TEXT,' +
         '"requested_on" DATETIME DEFAULT CURRENT_TIMESTAMP ' +
         ')');
-        addUser('AirLiquide','AirLiquide');
+        addUser({fullname:'AirLiquide',email:'michael.joss@gmail.com',password:'AirLiquide'});
     });
-    passport.use(new LocalStrategy(
-        function (username, password, done) {
+    passport.use('local-login',new LocalStrategy(
+        {        
+            usernameField : 'email',
+            passwordField : 'password',
+            passReqToCallback : true
+        },
+        function (req, email, password, done) {
             try {
-                db.get('SELECT salt FROM user WHERE username = ?', username, function (err, row) {
-                    if (!row) return done(null, false, { message: 'Incorrect username.' });
+                db.get('SELECT salt FROM user WHERE email = ?', email, function (err, row) {
+                    if (!row) return done(null, false, req.flash( "loginMessage", 'Unknown email.' ));
                     var hash = hashPassword(password, row.salt);
-                    db.get('SELECT username, id FROM user WHERE username = ? AND password = ?', username, hash, function (err, user) {
-                        if (!user) return done(null, false, { message: 'Incorrect password.' });
+                    db.get('SELECT fullname, email, id FROM user WHERE email = ? AND password = ?', email, hash, function (err, user) {
+                        if (!user) return done(null, false, req.flash( "loginMessage", 'Incorrect password.' ));
                         db.run("INSERT INTO login(user_id) VALUES(?)", user.id);
                         return done(null, user);
                     });
@@ -47,12 +53,31 @@ var init = function(app){
             }
         }));
 
+        passport.use('local-register',new LocalStrategy(
+            {        
+                usernameField : 'email',
+                passwordField : 'password',
+                passReqToCallback : true
+            },
+            function (req, email, password, done) {
+                try {
+                    db.get('SELECT salt FROM user WHERE email = ?', email, function (err, row) {
+                        if (row) return done(null, false, req.flash( "registerMessage", 'That email is already taken.' ));
+                        return addUser({fullname:req.body.fullname,email:email,password:password},function(user){
+                            return done(null, user);
+                        });                        
+                    });
+                } catch (err) {
+                    return done(err);
+                }
+            }));
+
     passport.serializeUser(function(user, done) {
         return done(null, user.id);
     });
 
     passport.deserializeUser(function(id, done) {
-        db.get('SELECT id, username FROM user WHERE id = ?', id, function(err, user) {
+        db.get('SELECT id, fullname, email FROM user WHERE id = ?', id, function(err, user) {
             if (!user) return done(null, false);
             return done(null, user);
         });
@@ -63,6 +88,7 @@ var isAuthenticated = function (req, res, next) {
   if (req.isAuthenticated()){
     var user_id = req.session.passport.user;
     db.run("INSERT INTO request(user_id,url) VALUES(?,?)",user_id,req.url);
+    delete req.session.returnTo;
     return next();
   }
   req.session.returnTo = req.url;
@@ -73,19 +99,38 @@ var authenticate = function (req, res, next) {
     let returnTo = req.session.returnTo || '/';
     delete req.session.returnTo;
     return passport.authenticate(
-        'local',
+        'local-login',
         {
             successRedirect: returnTo,
             failureRedirect: '/login',
-            failureFlash: false
+            failureFlash: true
         }
     );
 }
 
-function addUser(username,password){
-    var salt = hashPassword(username,new Date().toISOString());
-    var encryptedPassword = hashPassword(password,salt);
-  db.run("INSERT INTO user(username,password,salt) SELECT ?,?,? WHERE NOT EXISTS (SELECT 1 FROM USER WHERE username = ?)",username,encryptedPassword,salt,username);
+var register = function (req, res, next) {
+    return passport.authenticate(
+        'local-register',
+        {
+            successRedirect: '/login',
+            failureRedirect: '/register',
+            failureFlash: true
+        }
+    );
+}
+
+function addUser(user,callback){
+    var salt = hashPassword(user.email,new Date().toISOString());
+    var encryptedPassword = hashPassword(user.password,salt);
+    user.password = encryptedPassword;
+    db.run("INSERT INTO user(fullname,email,password,salt) SELECT ?,?,?,? WHERE NOT EXISTS (SELECT 1 FROM USER WHERE email = ?)",user.fullname,user.email,encryptedPassword,salt,user.email,
+        function(err){
+            user.id = this.lastID;
+            if(callback){
+                return callback(user);
+            }
+        }
+    );
 }
 
 function hashPassword(password, salt) {
@@ -98,6 +143,7 @@ function hashPassword(password, salt) {
 module.exports = {
     "init":init,
     "authenticate":authenticate,
+    "register":register,
     "isAuthenticated":isAuthenticated,
     "addUser":addUser
 }

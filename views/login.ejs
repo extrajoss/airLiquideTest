@@ -15,14 +15,23 @@
 
 <body>
     <div class="container">
+          <!-- show any messages that come back with authentication -->
       <form action="/login" method="post" class="form-signin">
       <div class="panel">
         <h3 class="form-signin-heading">Please sign in</h3>
-        <label for="username" class="sr-only">username</label>
-        <input type="username" id="username" name="username" class="form-control" placeholder="Username" required autofocus/>
+        <label for="email" class="sr-only">Email</label>
+        <input type="email" id="email" name="email" class="form-control" placeholder="email" required autofocus/>
         <label for="password" class="sr-only">Password</label>
-        <input type="password" id="password" name="password" class="form-control" placeholder="Password" required/>
+        <input type="password" id="password" name="password" class="form-control" placeholder="password" required/>
+        <% if (message.length > 0) { %>
+          <div class="alert alert-danger"><%= message %></div>
+        <% } %>
          <button class="btn btn-lg btn-block" type="submit">Sign in</button>
+         <p>Don't have an account?
+            <a href="/register">Register</a>
+        </p>
+        <p>Or go
+            <a href="/">home</a>.</p>
          </div>
       </form>
     </div>

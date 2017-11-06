@@ -1,3 +1,5 @@
+
+const flash    = require('connect-flash');
 const express = require('express');
 const session = require('express-session') 
 const config = require('./config');
@@ -8,7 +10,8 @@ const authentication = require('./server/authentication.js');
 
 /*
 const users = [{  
-  username: 'AirLiquide',
+  fullname: 'AirLiquide',
+  email: 'michael.joss@gmail.com',
   password: 'AirLiquide',
   id: 1
 }];
@@ -32,11 +35,13 @@ app.use(require('express-session')({
   resave: true,
   saveUninitialized: true
 }));
+app.use(flash());
 
 authentication.init(app);
 
 var isAuthenticated = function (req, res, next) {
   if(isExceptedFromAuthentication(req)){
+    delete req.session.returnTo;
     return next();
   } else{
     authentication.isAuthenticated(req, res, next);   
@@ -62,13 +67,25 @@ app.post('/login',
     }
 );
 app.get('/login',function(req,res,next){
-    res.render("login");
+    res.render("login", { message: req.flash('loginMessage') });
 });
-
+app.post('/register',
+    function(res,req,next){
+        return authentication.register(res,req,next)(res,req,next);
+    }
+);
+app.get('/register',function(req,res,next){
+    let flash_message = req.flash('registerMessage');
+    res.render("register", { message: flash_message });
+});
+app.get('/logout', function(req, res) {
+    req.logout();
+    res.redirect('/');
+});
 app.get('/addUser',isAuthenticated,
     function(req,res,next){
-        if(req.query.username && req.query.password ){
-            authentication.addUser(req.query.username,req.query.password);
+        if(req.query.fullname && req.query.email &&req.query.password ){
+            authentication.addUser(req.query.fullname,req.query.email,req.query.password);
             res.render("login");
         }
         res.status(404).send(err);
