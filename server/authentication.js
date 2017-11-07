@@ -3,6 +3,21 @@ const passport = require('passport')
 const db = require('sqlite');
 const crypto = require('crypto');
 
+const AUTHENTICATION_EXCEPTIONS = [
+    /^\/$/,
+    /^\/(2bmm|1be9)(\?cutoff=(veryHigh|high|medium|low|-0.5|-0.6))?$/,
+    /^\/data\/(2bmm|1be9)\/(veryHigh|high|medium|low|-0.5|-0.6)\/[0-5]\/$/,
+    /^\/getMaps\/(2bmm|1be9)\/(veryHigh|high|medium|low|-0.5|-0.6)\/$/
+];
+  
+var isExceptedFromAuthentication = function(url){
+      return AUTHENTICATION_EXCEPTIONS.some(
+          (authentication_exception)=>{
+          return authentication_exception.test(url);
+          }
+      );
+  }
+
 var init = function(app){
     app.use(passport.initialize());
     app.use(passport.session());
@@ -100,18 +115,30 @@ var init_database = async function(){
     addUser(admin_user);
 }
 
-var isAuthenticated = async function (req, res, next) {
-  if (req.isAuthenticated()){
-    var user_id = req.session.passport.user;
-    db.run("INSERT INTO request(user_id,url) VALUES(?,?)",user_id,req.url);
-    delete req.session.returnTo;
-    return next();
-  }
-  req.session.returnTo = req.url;
-  res.redirect('/login');
+var authenticate = function(req, res, next){
+    let user_id = req.session.passport?req.session.passport.user:false;
+    let url = req.url;
+    if(!isAuthenticated(req,user_id,url)){
+        req.session.returnTo = url;
+        res.redirect('/login');
+    }else{
+        delete req.session.returnTo;
+        return next();
+    }
 }
 
-var authenticate = function (req, res, next) {
+var isAuthenticated = function (req,user_id,url) {
+  if (req.isAuthenticated()){
+    db.run("INSERT INTO request(user_id,url) VALUES(?,?)",user_id,url);
+    return true;
+  }
+  if(isExceptedFromAuthentication(url)){
+    return true;
+  }
+  return false;
+}
+
+var login = function (req, res, next) {
     let returnTo = req.session.returnTo || '/';
     delete req.session.returnTo;
     return passport.authenticate(
@@ -125,10 +152,12 @@ var authenticate = function (req, res, next) {
 }
 
 var register = function (req, res, next) {
+    let returnTo = req.session.returnTo || '/';
+    delete req.session.returnTo;
     return passport.authenticate(
         'local-register',
         {
-            successRedirect: '/login',
+            successRedirect: returnTo,
             failureRedirect: '/register',
             failureFlash: true
         }
@@ -158,9 +187,9 @@ function hashPassword(password, salt) {
 
 module.exports = {
     "init":init,
-    "authenticate":authenticate,
+    "login":login,
     "register":register,
-    "isAuthenticated":isAuthenticated,
+    "authenticate":authenticate,
     "user_from_id":user_from_id,
     "addUser":addUser
 }

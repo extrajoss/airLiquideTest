@@ -17,13 +17,6 @@ const users = [{
 }];
 */
 
-const AUTHENTICATION_EXCEPTIONS = [
-    /^\/$/,
-    /^\/(2bmm|1be9)\?cutoff=high$/,
-    /^\/data\/(2bmm|1be9)\/high\/[0-5]\/$/,
-    /^\/getMaps\/(2bmm|1be9)\/high\/$/
-];
-
 var app = express();
 var port = config.web.port;
 var baseStatic = config.web.baseStatic;
@@ -39,31 +32,14 @@ app.use(flash());
 
 authentication.init(app);
 
-var isAuthenticated = function (req, res, next) {
-  if(isExceptedFromAuthentication(req)){
-    delete req.session.returnTo;
-    return next();
-  } else{
-    authentication.isAuthenticated(req, res, next);   
-  }
-}
-
-var isExceptedFromAuthentication = function(req){
-    let url = req.url;
-    return AUTHENTICATION_EXCEPTIONS.some(
-        (authentication_exception)=>{
-        return authentication_exception.test(url);
-        }
-    );
-}
-
 app.set('view engine','ejs');
 app.get('/favicon.ico', function(req, res,next) {
     res.sendStatus(204);
 });
 app.post('/login',
     function(res,req,next){
-        return authentication.authenticate(res,req,next)(res,req,next);
+        let login = authentication.login(res,req,next);
+        return login(res,req,next);
     }
 );
 app.get('/login',function(req,res,next){
@@ -72,7 +48,8 @@ app.get('/login',function(req,res,next){
 });
 app.post('/register',
     function(res,req,next){
-        return authentication.register(res,req,next)(res,req,next);
+        let register = authentication.register(res,req,next);
+        return register(res,req,next);
     }
 );
 app.get('/register',function(req,res,next){
@@ -83,7 +60,7 @@ app.get('/logout', function(req, res) {
     req.logout();
     res.redirect('/');
 });
-app.get('/addUser',isAuthenticated,
+app.get('/addUser',authentication.authenticate,
     function(req,res,next){
         if(req.query.fullname && req.query.email &&req.query.password ){
             authentication.addUser(req.query.fullname,req.query.email,req.query.password);
@@ -93,7 +70,7 @@ app.get('/addUser',isAuthenticated,
     }
 );
 
-app.get('/',isAuthenticated,
+app.get('/',authentication.authenticate,
     async function(req,res,next){
         if(req.query.pdb && req.query.pdb.length == 4 ){
             res.redirect('/'+req.query.pdb+'?cutoff=high');
@@ -118,7 +95,7 @@ app.get('/',isAuthenticated,
 );
 
 app.get(
-    '/:pdb/',isAuthenticated,
+    '/:pdb/',authentication.authenticate,
     function(req,res,next){
         res.render(
             "jolecule",
@@ -131,7 +108,7 @@ app.get(
 );
 
 app.get(
-    '/getUniprot/:uniprot',isAuthenticated,
+    '/getUniprot/:uniprot',authentication.authenticate,
     async function(req, res, next){               
         let fileName = uniprotHelpers.getUniProtFile(req.params.uniprot);
         let csvResults = uniprotHelpers.parseCSV(await fileName);
@@ -145,18 +122,18 @@ app.get(
     });   
 
 app.get(
-    '/getMaps/:pdb/:energyCutoffSet/',isAuthenticated,
+    '/getMaps/:pdb/:energyCutoffSet/',authentication.authenticate,
     function(req, res, next){        
         ecache.checkFilesAndReturnJSON(req,res);
     });   
 
 app.get(
-    '/flushCache/:pdb/:energyCutoffSet/',isAuthenticated,
+    '/flushCache/:pdb/:energyCutoffSet/',authentication.authenticate,
     function(req, res, next){
         ecache.flushCache(req,res);
     });
 app.get(
-    '/data/:pdb/:energyCutoffSet/:index/',isAuthenticated,
+    '/data/:pdb/:energyCutoffSet/:index/',authentication.authenticate,
     async function(req, res, next){     
         try{
             let dataServer = ecache.retrieveCache(req,res);  
