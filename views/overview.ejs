@@ -113,7 +113,7 @@ Object.keys(proteinListGoogleSpreadsheet).forEach(function(element) {
                 <%
   Object.keys(proteinListGoogleSpreadsheet[element][ligand]).forEach(function(energy) {
     var link;
-    if(user){
+    if(user||((element=="He")&&(energy=="high"))){
       link = "selectGoogleSpreadsheet(this,'" + proteinListGoogleSpreadsheet[element][ligand][energy] + "')";
     }else{
       link = "window.location.href = '/login'";
