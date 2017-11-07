@@ -110,15 +110,17 @@ app.get(
 app.get(
     '/getUniprot/:uniprot',authentication.authenticate,
     async function(req, res, next){               
-        let fileName = uniprotHelpers.getUniProtFile(req.params.uniprot);
-        let csvResults = uniprotHelpers.parseCSV(await fileName);
-        let fileNames = Promise.all(csvResults.mapFileChecks)
-        csvResults.fileNames = await fileNames;
-        for (var key in csvResults.fileNames) {
-            csvResults.clusters[key].fileName = csvResults.fileNames[key];   
-        }
-        res.write(JSON.stringify(csvResults.clusters) );
-        res.end();
+        let fileName = await uniprotHelpers.getUniProtFile(req.params.uniprot);
+        let csvResults = await uniprotHelpers.parseCSV(fileName);
+        Promise.all(csvResults.mapFileChecks)
+            .then((fileNames)=>{
+            csvResults.fileNames = fileNames;
+            for (var key in csvResults.fileNames) {
+                csvResults.clusters[key].fileName = csvResults.fileNames[key];   
+            }
+            res.write(JSON.stringify(csvResults.clusters) );
+            res.end();
+        });
     });   
 
 app.get(
