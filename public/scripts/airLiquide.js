@@ -44,7 +44,8 @@ var checkSearch = function(elementName){
 
 var displayClusters = function(res){
     if(res.ErrorText){
-        console.error(res.ErrorText);                           
+        console.error(res.ErrorText);  
+        window.location.href = "/login";                           
         return;
     }
     console.log("displayClusters",res);

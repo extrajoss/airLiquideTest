@@ -115,12 +115,24 @@ var init_database = async function(){
     addUser(admin_user);
 }
 
-var authenticate = function(req, res, next){
+var authenticate_page = function(req, res, next){
     let user_id = req.session.passport?req.session.passport.user:false;
     let url = req.url;
     if(!isAuthenticated(req,user_id,url)){
         req.session.returnTo = url;
         res.redirect('/login');
+    }else{
+        delete req.session.returnTo;
+        return next();
+    }
+}
+
+var authenticate_api = function(req, res, next){
+    let user_id = req.session.passport?req.session.passport.user:false;
+    let url = req.url;
+    if(!isAuthenticated(req,user_id,url)){
+        res.setHeader('Content-Type', 'application/json');
+        res.send(JSON.stringify({ErrorText: "Failed to Authenticate"}));
     }else{
         delete req.session.returnTo;
         return next();
@@ -189,7 +201,8 @@ module.exports = {
     "init":init,
     "login":login,
     "register":register,
-    "authenticate":authenticate,
+    "authenticate_page":authenticate_page,
+    "authenticate_api":authenticate_api,
     "user_from_id":user_from_id,
     "addUser":addUser
 }
