@@ -67,7 +67,8 @@ app.post('/login',
     }
 );
 app.get('/login',function(req,res,next){
-    res.render("login", { message: req.flash('loginMessage') });
+    let flash_message = req.flash('loginMessage');
+    res.render("login", { message: flash_message });
 });
 app.post('/register',
     function(res,req,next){
@@ -93,19 +94,24 @@ app.get('/addUser',isAuthenticated,
 );
 
 app.get('/',isAuthenticated,
-    function(req,res,next){
+    async function(req,res,next){
         if(req.query.pdb && req.query.pdb.length == 4 ){
             res.redirect('/'+req.query.pdb+'?cutoff=high');
         }
         if(req.query.pdb2 && req.query.pdb2.length == 4 ){
             res.redirect('/'+req.query.pdb2+'?cutoff=high');
         }
+        let user;
+        if (req.session.passport && req.session.passport.user){
+            user = await authentication.user_from_id(req.session.passport.user);
+        }
         res.render(
             "overview",
             {
                 proteinListGoogleSpreadsheet:config.web.proteinListGoogleSpreadsheet,
                 baseWebsite:config.web.baseWebsite,
-                defaultPDB:req.query.pdb
+                defaultPDB:req.query.pdb,
+                user: user
             }
         ); 
     }

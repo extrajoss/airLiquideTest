@@ -29,8 +29,15 @@
           <span id="pdbExamples">Examples: <a href="/2bmm?cutoff=high">2bmm</a> or <a href="/1be9?cutoff=high">1be9</a></span>
         </form>
         <div class="pageNav">
-          <a id="dataNav" name="dataNav" class="active" onclick="showData();">Data</a>&nbsp;|&nbsp;<a id="aboutNav" name="aboutNav"
-            onclick="showAbout();">About</a>
+          <a id="dataNav" name="dataNav" class="active" onclick="showData();">Data</a>
+          &nbsp;|&nbsp;
+          <a id="aboutNav" name="aboutNav" onclick="showAbout();">About</a>
+          &nbsp;|&nbsp;
+          <% if (user) { %>
+            <a id="logoutNav" name="logoutNav" class="" onclick="window.location.href ='/logout';">Logout of <%= user.fullname %> </a>
+          <% }else{ %>
+            <a id="loginNav" name="loginNav" class="" onclick="window.location.href ='/login';">Login</a>
+          <% } %>
         </div>
       </div>
     </div>
