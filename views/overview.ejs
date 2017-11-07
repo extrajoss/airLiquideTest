@@ -112,14 +112,19 @@ Object.keys(proteinListGoogleSpreadsheet).forEach(function(element) {
                 </th>
                 <%
   Object.keys(proteinListGoogleSpreadsheet[element][ligand]).forEach(function(energy) {
-    var link = proteinListGoogleSpreadsheet[element][ligand][energy];
+    var link;
+    if(user){
+      link = "selectGoogleSpreadsheet(this,'" + proteinListGoogleSpreadsheet[element][ligand][energy] + "')";
+    }else{
+      link = "window.location.href = '/login'";
+    }
     var classText = "";
     if(!selectedPlaced){
       selectedPlaced = true;
       classText = "selectedSpreadsheet";
     }
 %>
-                  <td class="<%=classText%>" onclick="selectGoogleSpreadsheet(this,'<%=link%>')"><img src="/assets/images/sheets-logo.png" height="50" width="45" title="⇲ <%=element%> <%=ligand%> <%=energy%>"
+                  <td class="<%=classText%>" onclick="<%=link%>"><img src="/assets/images/sheets-logo.png" height="50" width="45" title="⇲ <%=element%> <%=ligand%> <%=energy%>"
                       alt="⇲ <%=element%> <%=ligand%> <%=energy%>"></img>
                   </td>
                   <%
@@ -131,9 +136,14 @@ Object.keys(proteinListGoogleSpreadsheet).forEach(function(element) {
       borderleft="border-left:solid 0.2em #333333;"
       leftBorder = false;
     }     
-    var link = proteinListGoogleSpreadsheet[element][ligand][energy];
+    var link;
+    if(user){
+      link = "selectGoogleSpreadsheet(this,'" + proteinListGoogleSpreadsheet[element][ligand][energy] + "')";
+    }else{
+      link = "window.location.href = '/login'";
+    }
 %>
-                    <td style="<%=borderleft%>" onclick="selectGoogleSpreadsheet(this,'<%=link%>');"><img src="/assets/images/sheets-logo.png" height="50" width="45" title="⇲ <%=element%> <%=ligand%> <%=energy%>"
+                    <td style="<%=borderleft%>" onclick="<%=link%>"><img src="/assets/images/sheets-logo.png" height="50" width="45" title="⇲ <%=element%> <%=ligand%> <%=energy%>"
                         alt="⇲ <%=element%> <%=ligand%> <%=energy%>"></img>
                     </td>
                     <% 
