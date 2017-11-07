@@ -60,7 +60,7 @@ app.get('/logout', function(req, res) {
     req.logout();
     res.redirect('/');
 });
-app.get('/addUser',authentication.authenticate,
+app.get('/addUser',authentication.authenticate_page,
     function(req,res,next){
         if(req.query.fullname && req.query.email &&req.query.password ){
             authentication.addUser(req.query.fullname,req.query.email,req.query.password);
@@ -70,7 +70,7 @@ app.get('/addUser',authentication.authenticate,
     }
 );
 
-app.get('/',authentication.authenticate,
+app.get('/',authentication.authenticate_page,
     async function(req,res,next){
         if(req.query.pdb && req.query.pdb.length == 4 ){
             res.redirect('/'+req.query.pdb+'?cutoff=high');
@@ -95,7 +95,7 @@ app.get('/',authentication.authenticate,
 );
 
 app.get(
-    '/:pdb/',authentication.authenticate,
+    '/:pdb/',authentication.authenticate_page,
     function(req,res,next){
         res.render(
             "jolecule",
@@ -108,7 +108,7 @@ app.get(
 );
 
 app.get(
-    '/getUniprot/:uniprot',authentication.authenticate,
+    '/getUniprot/:uniprot',authentication.authenticate_api,
     async function(req, res, next){               
         let fileName = await uniprotHelpers.getUniProtFile(req.params.uniprot);
         let csvResults = await uniprotHelpers.parseCSV(fileName);
@@ -124,18 +124,18 @@ app.get(
     });   
 
 app.get(
-    '/getMaps/:pdb/:energyCutoffSet/',authentication.authenticate,
+    '/getMaps/:pdb/:energyCutoffSet/',authentication.authenticate_api,
     function(req, res, next){        
         ecache.checkFilesAndReturnJSON(req,res);
     });   
 
 app.get(
-    '/flushCache/:pdb/:energyCutoffSet/',authentication.authenticate,
+    '/flushCache/:pdb/:energyCutoffSet/',authentication.authenticate_api,
     function(req, res, next){
         ecache.flushCache(req,res);
     });
 app.get(
-    '/data/:pdb/:energyCutoffSet/:index/',authentication.authenticate,
+    '/data/:pdb/:energyCutoffSet/:index/',authentication.authenticate_api,
     async function(req, res, next){     
         try{
             let dataServer = ecache.retrieveCache(req,res);  
