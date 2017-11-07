@@ -1,3 +1,5 @@
+
+const flash    = require('connect-flash');
 const express = require('express');
 const session = require('express-session') 
 const config = require('./config');
@@ -8,18 +10,12 @@ const authentication = require('./server/authentication.js');
 
 /*
 const users = [{  
-  username: 'AirLiquide',
+  fullname: 'AirLiquide',
+  email: 'michael.joss@gmail.com',
   password: 'AirLiquide',
   id: 1
 }];
 */
-
-const AUTHENTICATION_EXCEPTIONS = [
-    /^\/$/,
-    /^\/(2bmm|1be9)\?cutoff=high$/,
-    /^\/data\/(2bmm|1be9)\/high\/[0-5]\/$/,
-    /^\/getMaps\/(2bmm|1be9)\/high\/$/
-];
 
 var app = express();
 var port = config.web.port;
@@ -32,68 +28,74 @@ app.use(require('express-session')({
   resave: true,
   saveUninitialized: true
 }));
+app.use(flash());
 
 authentication.init(app);
-
-var isAuthenticated = function (req, res, next) {
-  if(isExceptedFromAuthentication(req)){
-    return next();
-  } else{
-    authentication.isAuthenticated(req, res, next);   
-  }
-}
-
-var isExceptedFromAuthentication = function(req){
-    let url = req.url;
-    return AUTHENTICATION_EXCEPTIONS.some(
-        (authentication_exception)=>{
-        return authentication_exception.test(url);
-        }
-    );
-}
 
 app.set('view engine','ejs');
 app.get('/favicon.ico', function(req, res,next) {
     res.sendStatus(204);
 });
 app.post('/login',
-    authentication.authenticate()
+    function(res,req,next){
+        let login = authentication.login(res,req,next);
+        return login(res,req,next);
+    }
 );
 app.get('/login',function(req,res,next){
-    res.render("login");
+    let flash_message = req.flash('loginMessage');
+    res.render("login", { message: flash_message });
 });
-
-app.get('/addUser',isAuthenticated,
+app.post('/register',
+    function(res,req,next){
+        let register = authentication.register(res,req,next);
+        return register(res,req,next);
+    }
+);
+app.get('/register',function(req,res,next){
+    let flash_message = req.flash('registerMessage');
+    res.render("register", { message: flash_message });
+});
+app.get('/logout', function(req, res) {
+    req.logout();
+    res.redirect('/');
+});
+app.get('/addUser',authentication.authenticate,
     function(req,res,next){
-        if(req.query.username && req.query.password ){
-            authentication.addUser(req.query.username,req.query.password);
+        if(req.query.fullname && req.query.email &&req.query.password ){
+            authentication.addUser(req.query.fullname,req.query.email,req.query.password);
             res.render("login");
         }
         res.status(404).send(err);
     }
 );
 
-app.get('/',isAuthenticated,
-    function(req,res,next){
+app.get('/',authentication.authenticate,
+    async function(req,res,next){
         if(req.query.pdb && req.query.pdb.length == 4 ){
             res.redirect('/'+req.query.pdb+'?cutoff=high');
         }
         if(req.query.pdb2 && req.query.pdb2.length == 4 ){
             res.redirect('/'+req.query.pdb2+'?cutoff=high');
         }
+        let user;
+        if (req.session.passport && req.session.passport.user){
+            user = await authentication.user_from_id(req.session.passport.user);
+        }
         res.render(
             "overview",
             {
                 proteinListGoogleSpreadsheet:config.web.proteinListGoogleSpreadsheet,
                 baseWebsite:config.web.baseWebsite,
-                defaultPDB:req.query.pdb
+                defaultPDB:req.query.pdb,
+                user: user
             }
         ); 
     }
 );
 
 app.get(
-    '/:pdb/',isAuthenticated,
+    '/:pdb/',authentication.authenticate,
     function(req,res,next){
         res.render(
             "jolecule",
@@ -106,49 +108,42 @@ app.get(
 );
 
 app.get(
-    '/getUniprot/:uniprot',isAuthenticated,
-    function(req, res, next){               
-        uniprotHelpers.getUniProtFile(req.params.uniprot)
-            .then(function(fileName){
-                return uniprotHelpers.parseCSV(fileName);
-            }).then(function(csvResults){
-                return Promise.all(csvResults.mapFileChecks)
-                    .then(function(fileNames){
-                        csvResults.fileNames = fileNames;
-                        return csvResults
-                    });
-            }).then(function(csvResults){
-                for (var key in csvResults.fileNames) {
-                    csvResults.clusters[key].fileName = csvResults.fileNames[key];   
-                }
-                res.write(JSON.stringify(csvResults.clusters) );
-                res.end();
-            });
+    '/getUniprot/:uniprot',authentication.authenticate,
+    async function(req, res, next){               
+        let fileName = uniprotHelpers.getUniProtFile(req.params.uniprot);
+        let csvResults = uniprotHelpers.parseCSV(await fileName);
+        let fileNames = Promise.all(csvResults.mapFileChecks)
+        csvResults.fileNames = await fileNames;
+        for (var key in csvResults.fileNames) {
+            csvResults.clusters[key].fileName = csvResults.fileNames[key];   
+        }
+        res.write(JSON.stringify(csvResults.clusters) );
+        res.end();
     });   
 
 app.get(
-    '/getMaps/:pdb/:energyCutoffSet/',isAuthenticated,
+    '/getMaps/:pdb/:energyCutoffSet/',authentication.authenticate,
     function(req, res, next){        
         ecache.checkFilesAndReturnJSON(req,res);
     });   
 
 app.get(
-    '/flushCache/:pdb/:energyCutoffSet/',isAuthenticated,
+    '/flushCache/:pdb/:energyCutoffSet/',authentication.authenticate,
     function(req, res, next){
         ecache.flushCache(req,res);
     });
 app.get(
-    '/data/:pdb/:energyCutoffSet/:index/',isAuthenticated,
-    function(req, res, next){     
-        ecache.retrieveCache(req,res)
-            .then(function(dataServer){
-                res.setHeader('content-type', 'text/javascript');
-                res.write(dataServer);
-                res.end();
-            })
-            .catch(function(err){
-                    res.status(404).send(err);
-            });
+    '/data/:pdb/:energyCutoffSet/:index/',authentication.authenticate,
+    async function(req, res, next){     
+        try{
+            let dataServer = ecache.retrieveCache(req,res);  
+            res.setHeader('content-type', 'text/javascript');
+            res.write(await dataServer);
+            res.end();
+            
+        }catch(err){
+            res.status(404).send(err);
+        }
     });   
 
 app.use(function (req, res, next) {

@@ -29,8 +29,15 @@
           <span id="pdbExamples">Examples: <a href="/2bmm?cutoff=high">2bmm</a> or <a href="/1be9?cutoff=high">1be9</a></span>
         </form>
         <div class="pageNav">
-          <a id="dataNav" name="dataNav" class="active" onclick="showData();">Data</a>&nbsp;|&nbsp;<a id="aboutNav" name="aboutNav"
-            onclick="showAbout();">About</a>
+          <a id="dataNav" name="dataNav" class="active" onclick="showData();">Data</a>
+          &nbsp;|&nbsp;
+          <a id="aboutNav" name="aboutNav" onclick="showAbout();">About</a>
+          &nbsp;|&nbsp;
+          <% if (user) { %>
+            <a id="logoutNav" name="logoutNav" class="" onclick="window.location.href ='/logout';">Logout of <%= user.fullname %> </a>
+          <% }else{ %>
+            <a id="loginNav" name="loginNav" class="" onclick="window.location.href ='/login';">Login</a>
+          <% } %>
         </div>
       </div>
     </div>
@@ -145,14 +152,14 @@ Object.keys(proteinListGoogleSpreadsheet).forEach(function(element) {
           You can directly access specific PDB records using:</br>
           </br>
 
-          <strong><a href="<%=baseWebsite%>/2bmm"><%=baseWebsite%>/2bmm</a></strong></br>
+          <strong><a href="/2bmm"><%=baseWebsite%>/2bmm</a></strong></br>
           </br>
           Just replace ‘2bmm’ with any 4-letter PDB identifier.</br>
           </br>
 
           By default, noble gases are shown only in positions that are energetically favourable (i.e., energy cutoff = “high”).</br>
           </br>
-          <strong><a href="<%=baseWebsite%>/2bmm?cutoff=high"><%=baseWebsite%>/2bmm?cutoff=high</a></strong></br>
+          <strong><a href="/2bmm?cutoff=high"><%=baseWebsite%>/2bmm?cutoff=high</a></strong></br>
           </br>The available cutoffs (in kcal/mol) are listed below and may also include any number between -0.5 and -2.0:</br>
           </br>
           <table id="cutoffTable">
@@ -165,7 +172,7 @@ Object.keys(proteinListGoogleSpreadsheet).forEach(function(element) {
               <th>Xe</th>
             </tr>
             <tr>
-              <th><a href=<%=baseWebsite%>/2bmm?cutoff=veryHigh>veryHigh</a></th>
+              <th><a href="/2bmm?cutoff=veryHigh">veryHigh</a></th>
               <td>-0.6</td>
               <td>-0.6</td>
               <td>-1.2</td>
@@ -174,7 +181,7 @@ Object.keys(proteinListGoogleSpreadsheet).forEach(function(element) {
               <td></td>
             </tr>
             <tr>
-              <th><a href=<%=baseWebsite%>/2bmm?cutoff=high>high</a></th>
+              <th><a href="/2bmm?cutoff=high">high</a></th>
               <td>-0.4</td>
               <td>-0.4</td>
               <td>-0.9</td>
@@ -183,7 +190,7 @@ Object.keys(proteinListGoogleSpreadsheet).forEach(function(element) {
               <td></td>
             </tr>
             <tr>
-              <th><a href=<%=baseWebsite%>/2bmm?cutoff=medium>medium</a></th>
+              <th><a href="/2bmm?cutoff=medium">medium</a></th>
               <td>-0.3</td>
               <td>-0.3</td>
               <td>-0.8</td>
@@ -192,7 +199,7 @@ Object.keys(proteinListGoogleSpreadsheet).forEach(function(element) {
               <td></td>
             </tr>
             <tr>
-              <th><a href=<%=baseWebsite%>/2bmm?cutoff=low>low</a></th>
+              <th><a href="/2bmm?cutoff=low">low</a></th>
               <td>-0.3</td>
               <td>-0.3</td>
               <td>-0.6</td>
@@ -201,7 +208,7 @@ Object.keys(proteinListGoogleSpreadsheet).forEach(function(element) {
               <td></td>
             </tr>
             <tr>
-              <th><a href=<%=baseWebsite%>/2bmm?cutoff=-0.5>-0.5</a></th>
+              <th><a href="/2bmm?cutoff=-0.5">-0.5</a></th>
               <td>-0.5</td>
               <td>-0.5</td>
               <td>-0.5</td>
@@ -210,7 +217,7 @@ Object.keys(proteinListGoogleSpreadsheet).forEach(function(element) {
               <td></td>
             </tr>
             <tr>
-              <th><a href=<%=baseWebsite%>/2bmm?cutoff=-0.6>-0.6</a></th>
+              <th><a href="/2bmm?cutoff=-0.6">-0.6</a></th>
               <td>-0.6</td>
               <td>-0.6</td>
               <td>-0.6</td>
