@@ -13,9 +13,9 @@ app.get('/favicon.ico', function (req, res) {
 })
 
 app.post('/login',
-    function (res, req, next) {
-      let login = authentication.login(res, req, next)
-      return login(res, req, next)
+    function (req, res, next) {
+      let login = authentication.login(req, res, next)
+      return login(req, res, next)
     }
 )
 
@@ -26,9 +26,9 @@ app.get('/login', function (req, res) {
 })
 
 app.post('/register',
-    function (res, req, next) {
-      let register = authentication.register(res, req, next)
-      return register(res, req, next)
+    function (req, res, next) {
+      let register = authentication.register(req, res, next)
+      return register(req, res, next)
     }
 )
 
@@ -40,9 +40,9 @@ app.get('/register', function (req, res) {
 })
 
 app.post('/manageUser', authentication.authenticatePage,
-  async function (res, req, next) {
-    const manageUser = await authentication.manageUser(res, req, next)
-    return manageUser(res, req, next)
+  async function (req, res, next) {
+    const manageUser = await authentication.manageUser(req, res, next)
+    return manageUser(req, res, next)
   }
 )
 
@@ -67,9 +67,9 @@ app.get('/reset/:token',
     res.render('reset', { fullname: userByToken.fullname, email: userByToken.email, reset_password_token: req.params.token, message: flashMessage })
   })
 
-app.post('/reset/:token', async function (res, req, next) {
-  const resetPassword = await authentication.resetPassword(res, req, next)
-  return resetPassword(res, req, next)
+app.post('/reset/:token', async function (req, res, next) {
+  const resetPassword = await authentication.resetPassword(req, res, next)
+  return resetPassword(req, res, next)
 })
 
 app.get('/forgotPassword',
