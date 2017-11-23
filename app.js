@@ -137,7 +137,7 @@ app.get(
             'jolecule',
         {
           pdb: req.params.pdb,
-          energyCutoffSet: req.query.cutoff || Object.keys(config.jolecule.ENERGY_CUTOFF_SETS)[0]
+          energyCutoffSet: req.query.cutoff || Object.keys(config.get('jolecule').ENERGY_CUTOFF_SETS)[0]
         }
         )
     }
