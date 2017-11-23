@@ -96,7 +96,7 @@ const checkFilesAndReturnJSON = function (req, res) {
     let err = "'" + energyCutoffSet + "' is not a valid energyCutoffSet. (Try: " + Object.keys(jol.ENERGY_CUTOFF_SETS).join(',') + ')'
     console.error(err)
     res.setHeader('Content-Type', 'application/json')
-    res.send(JSON.stringify({ ErrorText: err }))
+    res.send(JSON.stringify({ ErrorText: err.message }))
     return
   }
   getDataServersFromCache(jol)
@@ -105,9 +105,10 @@ const checkFilesAndReturnJSON = function (req, res) {
       res.send(JSON.stringify({ pdb: pdb, cutoff: energyCutoffSet, dataServerRoute: jol.paths.dataServerRoute }))
     })
     .catch(function (err) {
-      console.error('An Error occured during file preparation: ' + err)
+      const message = 'An Error occured during file preparation: ' + err.message
+      console.error('An Error occured during file preparation: ' + err.message)
       res.setHeader('Content-Type', 'application/json')
-      res.send(JSON.stringify({ ErrorText: err }))
+      res.send(JSON.stringify({ ErrorText: message }))
     })
 }
 
