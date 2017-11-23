@@ -1,0 +1,59 @@
+
+<html>
+        
+        <head>
+          <title>Group18: Noble gas interaction with proteins</title>
+          <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+          <link rel="stylesheet" type="text/css" href="/css/aquariaStyle.css">
+          <link rel="stylesheet" type="text/css" href="/css/style.css">
+          <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+          <script src="/scripts/airLiquide.js"></script>
+          <meta name="viewport" content="width=device-width, initial-scale=1" />
+          <meta name="apple-mobile-web-app-capable" content="yes">
+          <meta name="mobile-web-app-capable" content="yes">
+        </head>
+        <body>
+            <div class="container">
+                  <!-- show any messages that come back with authentication -->
+              <form action="/reset/<%= reset_password_token %>" method="post" class="form-signin">
+              <div class="panel">
+                <h3 class="form-signin-heading">Reset password for <%= fullname %></h3>
+                <div class="form-group">                
+                <label for="new_password" class="sr-only">New Password</label>
+                <input type="password" id="new_password" name="new_password" class="form-control" placeholder="new password"/>
+
+                <label for="confirm_new_password" class="sr-only">Confirm New Password</label>
+                <input type="password" id="confirm_new_password" name="confirm_new_password" class="form-control" placeholder="confirm new password"/>
+
+                <% if (message.length > 0) { %>
+                  <div class="alert alert-danger"><%= message %></div>
+                <% } %>
+              </div>
+                 <button class="btn btn-lg btn-block" type="submit">Update Password</button>
+                 </div>
+              </form>
+            </div>
+        </body>
+        <script>
+          var password = document.getElementById("password")
+            , new_password = document.getElementById("new_password")
+            , confirm_new_password = document.getElementById("confirm_new_password");
+  
+          function validatePassword(){
+            if(new_password.value>""){
+              new_password.setAttribute("required","")
+              confirm_new_password.setAttribute("required","")
+            }else{
+              new_password.removeAttribute("required")
+              confirm_new_password.removeAttribute("required")
+            }
+            if(new_password.value != confirm_new_password.value) {
+              confirm_new_password.setCustomValidity("Passwords Don't Match");
+            } else {
+              confirm_new_password.setCustomValidity('');
+            }
+          }
+          new_password.onchange = validatePassword;
+          confirm_new_password.onkeyup = validatePassword;
+          </script>
+        </html>

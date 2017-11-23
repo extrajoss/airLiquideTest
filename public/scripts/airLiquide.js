@@ -74,6 +74,7 @@ var openMap = function (pdb,energyCutoffSet){
         console.log("Loaded");
     });
 };  
+
 var displayJolecule = function(res) {    
     if(res.ErrorText){
         console.error(res.ErrorText);  

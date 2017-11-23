@@ -13,20 +13,17 @@
   "license": "ISC",
   "dependencies": {
     "bluebird": "^3.5.0",
-    "body-parser": "latest",
-    "connect-flash": "^0.1.1",
-    "cookie-parser": "latest",
     "crypto": "0.0.3",
     "csv": "^1.1.1",
     "csv-parse": "^1.2.0",
     "ejs": "latest",
-    "express": "latest",
-    "express-session": "^1.15.2",
     "fast-csv": "^2.4.0",
     "forever": "latest",
     "fs-extra": "latest",
     "googleapis": "^19.0.0",
+    "homebase": "github:extrajoss/homebase",
     "mkdirp": "latest",
+    "nodemailer": "^4.3.1",
     "numeral": "latest",
     "object-sizeof": "latest",
     "passport": "^0.3.2",
@@ -36,6 +33,7 @@
   },
   "devDependencies": {
     "babel-cli": "^6.24.1",
-    "nodemon": "latest"
+    "nodemon": "latest",
+    "standard": "^10.0.3"
   }
 }

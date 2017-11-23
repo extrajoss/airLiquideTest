@@ -34,7 +34,9 @@
           <a id="aboutNav" name="aboutNav" onclick="showAbout();">About</a>
           &nbsp;|&nbsp;
           <% if (user) { %>
-            <a id="logoutNav" name="logoutNav" class="" onclick="window.location.href ='/logout';">Logout of <%= user.fullname %> </a>
+            <a id="manageUserNav" name="manageUserNav" class="" onclick="window.location.href ='/manageUser';"><%= user.fullname %> </a>
+            &nbsp;|&nbsp;
+            <a id="logoutNav" name="logoutNav" class="" onclick="window.location.href ='/logout';">Logout</a>
           <% }else{ %>
             <a id="loginNav" name="loginNav" class="" onclick="window.location.href ='/login';">Login</a>
           <% } %>
@@ -52,7 +54,7 @@
         <h3 id="dataSetsTab" name="dataSetsTab" class="sub" onclick="showDataSetsTab();">Datasets</h3>
         <h3 id="spreadsheetTab" name="spreadsheetTab" class="sub inactive" onclick="showSpreadsheetTab();">Spreadsheet</h3>
         <h3 id="clustersTab" name="clustersTab" class="sub inactive" onclick="showClustersTab();">Clusters</h3>
-        <iframe id="googleSpreadSheet" name="googleSpreadSheet" frameborder="0" scrolling="" src="https://docs.google.com/spreadsheets/d/1DjmSc7hcU_NUspzmpL5na9xlCoTMZRj6F8HrE_luOvI/edit#gid=448796123"
+        <iframe id="googleSpreadSheet" name="googleSpreadSheet" frameborder="0" scrolling="" src=""
           style="display:none;width: 100%; height: 700px;"></iframe>
           <table id="clusters" name="clusters" class="clusters" style="display:none;">
             <thead>
@@ -87,12 +89,12 @@
           <tbody>
             <% 
 var selectedPlaced = false;
-Object.keys(proteinListGoogleSpreadsheet).forEach(function(element) { 
+Object.keys(spreadsheet).forEach(function(element) { 
   var ligand = "withLigand";
   var leftBorder = true;
-  var elementName = proteinListGoogleSpreadsheet[element].elementName;
-  var atomicNumber = proteinListGoogleSpreadsheet[element].atomicNumber;
-  var atomicWeight = proteinListGoogleSpreadsheet[element].atomicWeight;
+  var elementName = spreadsheet[element].elementName;
+  var atomicNumber = spreadsheet[element].atomicNumber;
+  var atomicWeight = spreadsheet[element].atomicWeight;
 %>
 
               <tr class="element-<%=element%>">
@@ -111,39 +113,42 @@ Object.keys(proteinListGoogleSpreadsheet).forEach(function(element) {
                   </div>
                 </th>
                 <%
-  Object.keys(proteinListGoogleSpreadsheet[element][ligand]).forEach(function(energy) {
-    var link;
-    if(user||((element=="He")&&(energy=="high"))){
-      link = "selectGoogleSpreadsheet(this,'" + proteinListGoogleSpreadsheet[element][ligand][energy] + "')";
+  Object.keys(spreadsheet[element][ligand]).forEach(function(energy) {
+    var onclick;
+    var currentSpreadSheet = {element:element,ligand:ligand,energy:energy};
+    var isDefaultSpreadsheet = isDefault(currentSpreadSheet,defaultSpreadsheet);
+    if(user||isDefaultSpreadsheet){
+      onclick = "selectGoogleSpreadsheet(this,'" + spreadsheet[element][ligand][energy] + "')";
     }else{
-      link = "window.location.href = '/login'";
+      onclick = "window.location.href = '/login'";
     }
     var classText = "";
-    if(!selectedPlaced){
-      selectedPlaced = true;
+    if(isDefaultSpreadsheet){
       classText = "selectedSpreadsheet";
     }
 %>
-                  <td class="<%=classText%>" onclick="<%=link%>"><img src="/assets/images/sheets-logo.png" height="50" width="45" title="⇲ <%=element%> <%=ligand%> <%=energy%>"
+                  <td class="<%=classText%>" onclick="<%=onclick%>"><img src="/assets/images/sheets-logo.png" height="50" width="45" title="⇲ <%=element%> <%=ligand%> <%=energy%>"
                       alt="⇲ <%=element%> <%=ligand%> <%=energy%>"></img>
                   </td>
                   <%
   });
   ligand = "withoutLigand";
-  Object.keys(proteinListGoogleSpreadsheet[element][ligand]).forEach(function(energy) {
+  Object.keys(spreadsheet[element][ligand]).forEach(function(energy) {
     var borderleft = "";
     if(leftBorder){
       borderleft="border-left:solid 0.2em #333333;"
       leftBorder = false;
     }     
-    var link;
-    if(user){
-      link = "selectGoogleSpreadsheet(this,'" + proteinListGoogleSpreadsheet[element][ligand][energy] + "')";
+    var onclick;
+    var currentSpreadSheet = {element:element,ligand:ligand,energy:energy};
+    var isDefaultSpreadsheet = isDefault(currentSpreadSheet,defaultSpreadsheet);
+    if(user||isDefaultSpreadsheet){
+      onclick = "selectGoogleSpreadsheet(this,'" + spreadsheet[element][ligand][energy] + "')";
     }else{
-      link = "window.location.href = '/login'";
+      onclick = "window.location.href = '/login'";
     }
 %>
-                    <td style="<%=borderleft%>" onclick="<%=link%>"><img src="/assets/images/sheets-logo.png" height="50" width="45" title="⇲ <%=element%> <%=ligand%> <%=energy%>"
+                    <td style="<%=borderleft%>" onclick="<%=onclick%>"><img src="/assets/images/sheets-logo.png" height="50" width="45" title="⇲ <%=element%> <%=ligand%> <%=energy%>"
                         alt="⇲ <%=element%> <%=ligand%> <%=energy%>"></img>
                     </td>
                     <% 
