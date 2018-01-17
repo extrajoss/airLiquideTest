@@ -2,6 +2,7 @@ const joleculeHelpers = require('./joleculeHelpers.js')
 const config = require('../config')
 const sizeof = require('object-sizeof')
 const fs = require('fs-extra')
+
 var dataServersCaches = {}
 var dataServerCacheIdToRemove
 
@@ -24,7 +25,37 @@ const retrieveCache = function (req) {
     })
 }
 
-const checkFilesAndReturnJSON = function (req, res) {
+const retrievePDBFilesFromCache = async function (req) {
+  let pdb = req.params.pdb
+  let energyCutoffSet = req.params.energyCutoffSet
+  let cacheId = pdb + '_' + energyCutoffSet
+  let dataServers = dataServersCaches[cacheId]
+  if (!dataServers) {
+    await checkFiles(req)
+    dataServers = dataServersCaches[cacheId]
+  }
+  await dataServers.dataServers
+  let jol = joleculeHelpers.set(pdb, energyCutoffSet)
+  let paths = jol.paths
+  return paths.processedPdbLocalPath
+}
+
+const retrieveMapFilesFromCache = async function (req) {
+  let pdb = req.params.pdb
+  let energyCutoffSet = req.params.energyCutoffSet
+  let cacheId = pdb + '_' + energyCutoffSet
+  let dataServers = dataServersCaches[cacheId]
+  if (!dataServers) {
+    await checkFiles(req)
+    dataServers = dataServersCaches[cacheId]
+  }
+  await dataServers.dataServers
+  let jol = joleculeHelpers.set(pdb, energyCutoffSet)
+  let paths = jol.paths
+  return paths.mapLocalPaths
+}
+
+const checkFiles = async function (req) {
   let pdb = req.params.pdb
   let energyCutoffSet = req.params.energyCutoffSet
   let jol = joleculeHelpers.set(pdb, energyCutoffSet)
@@ -88,32 +119,38 @@ const checkFilesAndReturnJSON = function (req, res) {
   if (!jol.isPdb()) {
     let err = "'" + pdb + "' is not a valid PDB record"
     console.error(err)
-    res.setHeader('Content-Type', 'application/json')
-    res.send(JSON.stringify({ ErrorText: err }))
-    return
+    throw new Error(err)
   }
   if (!jol.isEnergyCutoffSet()) {
     let err = "'" + energyCutoffSet + "' is not a valid energyCutoffSet. (Try: " + Object.keys(jol.ENERGY_CUTOFF_SETS).join(',') + ')'
     console.error(err)
+    throw new Error(err.message)
+  }
+  try {
+    await getDataServersFromCache(jol)
+    return JSON.stringify({ pdb: pdb, cutoff: energyCutoffSet, dataServerRoute: jol.paths.dataServerRoute })
+  } catch (err) {
+    const message = 'An Error occured during file preparation: ' + err.message
+    console.error(message)
+    throw new Error(message)
+  }
+}
+
+const checkFilesAndReturnJSON = async function (req, res) {
+  try {
+    const result = await checkFiles(req)
+    res.setHeader('Content-Type', 'application/json')
+    res.send(result)
+  } catch (err) {
     res.setHeader('Content-Type', 'application/json')
     res.send(JSON.stringify({ ErrorText: err.message }))
-    return
   }
-  getDataServersFromCache(jol)
-    .then(function () {
-      res.setHeader('Content-Type', 'application/json')
-      res.send(JSON.stringify({ pdb: pdb, cutoff: energyCutoffSet, dataServerRoute: jol.paths.dataServerRoute }))
-    })
-    .catch(function (err) {
-      const message = 'An Error occured during file preparation: ' + err.message
-      console.error('An Error occured during file preparation: ' + err.message)
-      res.setHeader('Content-Type', 'application/json')
-      res.send(JSON.stringify({ ErrorText: message }))
-    })
 }
 
 module.exports = {
   'checkFilesAndReturnJSON': checkFilesAndReturnJSON,
   'flushCache': flushCache,
-  'retrieveCache': retrieveCache
+  'retrieveCache': retrieveCache,
+  'retrievePDBFilesFromCache': retrievePDBFilesFromCache,
+  'retrieveMapFilesFromCache': retrieveMapFilesFromCache
 }

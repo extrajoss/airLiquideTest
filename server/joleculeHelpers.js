@@ -69,7 +69,7 @@ const joleculeHelpers = function (pdb, energyCutoffSet) {
     'pdbFileRemotePath': mapFileLocalPath(),
     'pdbFileLocalPath': pdbFileLocalPath(),
     'processedPdbLocalPath': processedPdbLocalPath(),
-    'processedPdbFileLocalPath': processedPdbFileLocalPath(),
+    'processedPdbFileLocalPath': NOBLE_GAS_SYMBOLS.map(processedPdbFileLocalPath),
     'dataServerLocalPathClient': dataServerLocalPathClient(),
     'dataServerLocalPath': dataServerLocalPath(),
     'dataServerFileLocalPaths': DATA_SERVER_FILE_NUMBERS.map(dataServerFileLocalPath),
@@ -113,8 +113,11 @@ const joleculeHelpers = function (pdb, energyCutoffSet) {
     const remoteFilePath = mapFileRemotePath(nobleGas)
     const sharedFilePath = mapFileSharedPath(nobleGas)
     const localFilePath = mapFileLocalPath(nobleGas)
-    return ensureFileWithRemoteFile(localFilePath, remoteFilePath, sharedFilePath)
-            .catch(function () { throw new Error("There are no available map files for the PDB '" + pdb + "'<br/>If you wish to view the PDB on jolecule please click <a href='http://jolecule.appspot.com/pdb/" + pdb + "#view:000000'>here</a>") })
+    try {
+      return ensureFileWithRemoteFile(localFilePath, remoteFilePath, sharedFilePath)
+    } catch (err) {
+      throw new Error("There are no available map files for the PDB '" + pdb + "'<br/>If you wish to view the PDB on jolecule please click <a href='http://jolecule.appspot.com/pdb/" + pdb + "#view:000000'>here</a>")
+    }
   }
 
   const checkMapFile = async function () {

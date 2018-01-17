@@ -7,8 +7,10 @@ const nodemailer = require('nodemailer')
 const AUTHENTICATION_EXCEPTIONS = [
   /^\/$/,
   /^\/(2bmm|1be9)(\?cutoff=(veryHigh|high|medium|low|-0.5|-0.6))?$/,
-  /^\/data\/(2bmm|1be9)\/(veryHigh|high|medium|low|-0.5|-0.6)\/[0-5]\/$/,
-  /^\/getMaps\/(2bmm|1be9)\/(veryHigh|high|medium|low|-0.5|-0.6)\/$/
+  /^\/data\/(2bmm|1be9)\/(veryHigh|high|medium|low|-0.5|-0.6)\/[0-5]\/?$/,
+  /^\/getMaps\/(2bmm|1be9)\/(veryHigh|high|medium|low|-0.5|-0.6)\/?$/,
+  /^\/data\/pdbFiles\/(2bmm|1be9)\/(veryHigh|high|medium|low|-0.5|-0.6)\/?$/,
+  /^\/data\/mapFiles\/(2bmm|1be9)\/(veryHigh|high|medium|low|-0.5|-0.6)\/?$/
 ]
 
 const isExceptedFromAuthentication = function (url) {

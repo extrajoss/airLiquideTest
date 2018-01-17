@@ -3,6 +3,7 @@ const ecache = require('./server/ensureProcessingCache.js')
 const uniprotHelpers = require('./server/uniprotHelpers.js')
 const authentication = require('./server/authentication.js')
 const baseApp = require('homebase/app')
+const archiver = require('archiver')
 
 var app = baseApp.setup()
 
@@ -170,6 +171,51 @@ app.get(
     function (req, res) {
       ecache.flushCache(req, res)
     })
+
+app.get(
+  '/data/pdbFiles/:pdb/:energyCutoffSet/', authentication.authenticateApi,
+  async function (req, res) {
+    try {
+      const path = await ecache.retrievePDBFilesFromCache(req, res)
+      const zip = archiver('zip')
+      const pdb = req.params.pdb
+      res.on('end', function () {
+        console.log('Archive wrote %d bytes', zip.pointer())
+        return res.status(200).send('OK').end()
+      })
+      res.attachment(pdb + '_pdbfiles.zip')
+      res.setHeader('content-type', 'application/zip')
+      zip.pipe(res)
+      zip.directory(path, false)
+      zip.finalize()
+    } catch (err) {
+      res.status(500).send(err.message).end()
+    }
+  })
+
+app.get(
+    '/data/mapFiles/:pdb/:energyCutoffSet/', authentication.authenticateApi,
+    async function (req, res) {
+      try {
+        const paths = await ecache.retrieveMapFilesFromCache(req, res)
+        const zip = archiver('zip')
+        const pdb = req.params.pdb
+        res.on('end', function () {
+          console.log('Archive wrote %d bytes', zip.pointer())
+          return res.status(200).send('OK').end()
+        })
+        res.attachment(pdb + '_mapfiles.zip')
+        res.setHeader('content-type', 'application/zip')
+        zip.pipe(res)
+        paths.forEach((path) => {
+          zip.directory(path, false)
+        })
+        zip.finalize()
+      } catch (err) {
+        res.status(500).send(err.message).end()
+      }
+    })
+
 app.get(
     '/data/:pdb/:energyCutoffSet/:index/', authentication.authenticateApi,
     async function (req, res) {
