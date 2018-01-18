@@ -93,7 +93,7 @@ var displayJolecule = function(res) {
     $("#jolecule").show();  
     $("#tempLoading").hide();          
     require( 
-            ['/scripts/jolecule2.js', 
+            ['/scripts/jolecule3.js', 
             dataServerRoute+"/0/", 
             dataServerRoute+"/1/", 
             dataServerRoute+"/2/", 
@@ -102,9 +102,9 @@ var displayJolecule = function(res) {
             dataServerRoute+"/5/"], 
             function(jolecule, dataServer0, dataServer1, dataServer2, dataServer3, dataServer4, dataServer5) {                  
                 j = jolecule.initEmbedJolecule({
-                    div_tag: '#jolecule',
+                    divTag: '#jolecule',
                     isGrid: true,
-                    loading_html:"<div class='loader'>Loading....</div>",
+                    loadingHtml:"<div class='loader'>Loading....</div>",
                 });
                 for (var dataServer of [dataServer0, dataServer1, dataServer2, dataServer3, dataServer4, dataServer5]) {
                     j.addDataServer(dataServer);
