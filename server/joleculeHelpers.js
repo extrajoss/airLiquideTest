@@ -120,9 +120,9 @@ const joleculeHelpers = function (pdb, energyCutoffSet) {
     }
   }
 
-  const checkMapFile = async function () {
-    const sharedFilePath = mapFileSharedPath('He')
-    const localFilePath = mapFileLocalPath('He')
+  const checkMapFile = async function (nobleGas = 'He') {
+    const sharedFilePath = mapFileSharedPath(nobleGas)
+    const localFilePath = mapFileLocalPath(nobleGas)
     let fileName = checkIfFile(sharedFilePath)
     if (await fileName) {
       return fileName
@@ -194,6 +194,7 @@ const joleculeHelpers = function (pdb, energyCutoffSet) {
       await runJoleculeStatic()
       try {
         if (checkJoleculeStaticFiles()) {
+          removeProcessedMapFiles()
           return getDataServers()
         } else {
           throw new Error('Static script succeeded but Static Files not generated')
@@ -235,6 +236,17 @@ const joleculeHelpers = function (pdb, energyCutoffSet) {
       }
     }
     return result
+  }
+
+  const removeProcessedMapFiles = function () {
+    NOBLE_GAS_SYMBOLS.map(removeProcessedMapFile)
+  }
+
+  const removeProcessedMapFile = async function (nobleGas) {
+    if (await checkMapFile(nobleGas)) {
+      const localFilePath = mapFileLocalPath(nobleGas)
+      fs.remove(localFilePath)
+    }
   }
 
   const runJoleculeStatic = function () {
