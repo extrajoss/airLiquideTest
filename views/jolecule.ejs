@@ -15,7 +15,13 @@
   </head>
   <body>  
     <div id="tempLoading"></div>
+    <div id="toolbar">
+      <a href="/" target="blank">Back</a>
+      <a href="data/pdbFiles/<%=pdb%>/<%=energyCutoffSet%>" target="blank">Download PDBs</a>
+      <a href="data/mapFiles/<%=pdb%>/<%=energyCutoffSet%>" target="blank">Download Maps</a>
+    </div>
     <div id="jolecule"></div>
+    <script>var requirejs = { waitSeconds: 30 };</script>  
     <script src="/scripts/require.js"></script>  
     <script>$("#tempLoading").append(loadingDiv);openMap("<%=pdb%>","<%=energyCutoffSet%>");</script>
   </body>
